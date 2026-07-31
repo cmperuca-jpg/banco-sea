@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Fusion Sistema - Minha Avaliação</title>
+  <script src="/assets/js/fusion-portal-guard.js" data-fusion-guard="aluno"></script>
+  <link rel="manifest" href="/manifest-sistema.webmanifest">
+  <meta name="theme-color" content="#22b8d2">
+
+  <link rel="stylesheet" href="/assets/css/fusion-app.css?v=20260730-template-unico-1">
+  <link rel="stylesheet" href="/assets/css/fusion-no-sidebar.css">
+  <link rel="stylesheet" href="/assets/css/fusion-theme.css?v=20260730-template-unico-1">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="/assets/css/fusion-menu-global.css?v=20260730-template-unico-1">
+</head>
+<body class="pagina-avaliacao-aluno">
+  <main class="avaliacao-aluno-app">
+    <header class="avaliacao-hero">
+      <div class="hero-actions hero-actions--top">
+        <button id="btnVoltar" class="btn btn-ghost" type="button" aria-label="Voltar ao meu treino">
+          <span aria-hidden="true">←</span>
+          <span>Meu treino</span>
+        </button>
+        <button id="btnAtualizar" class="btn btn-secondary" type="button">
+          <span class="refresh-icon" aria-hidden="true">↻</span>
+          <span>Atualizar dados</span>
+        </button>
+      </div>
+
+      <div class="hero-profile">
+        <div class="avatar-shell" aria-hidden="true">
+          <img id="fotoAluno" class="avatar-image hidden" alt="">
+          <span id="fotoFallback" class="avatar-fallback">AL</span>
+        </div>
+        <div class="hero-copy">
+          <span class="eyebrow">Minha evolução física</span>
+          <h1 id="tituloAluno">Minha avaliação</h1>
+          <p id="subtitulo">Resultados registrados pelo seu professor, organizados para acompanhar sua evolução.</p>
+          <div class="hero-meta" aria-label="Resumo da avaliação">
+            <span class="meta-chip"><small>Última avaliação</small><strong id="dataAtualHero">Aguardando</strong></span>
+            <span class="meta-chip"><small>Professor</small><strong id="professorHero">Não informado</strong></span>
+            <span class="meta-chip"><small>Objetivo</small><strong id="objetivoHero">Não informado</strong></span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section id="alerta" class="alerta hidden" role="status" aria-live="polite"></section>
+
+    <section id="estadoVazio" class="estado-vazio hidden" aria-live="polite">
+      <div class="estado-vazio__icone" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+      <span class="eyebrow">Sua jornada começa aqui</span>
+      <h2>Ainda não existe uma avaliação física registrada</h2>
+      <p>Quando seu professor salvar a primeira avaliação, esta página mostrará composição corporal, medidas, evolução e fotos posturais de forma organizada.</p>
+      <div class="estado-vazio__acoes">
+        <button id="btnVoltarVazio" class="btn btn-primary" type="button">Voltar ao treino</button>
+        <button id="btnAtualizarVazio" class="btn btn-ghost" type="button">Verificar novamente</button>
+      </div>
+    </section>
+
+    <div id="conteudoAvaliacao" class="conteudo-avaliacao hidden">
+      <section aria-labelledby="tituloResumo" class="section-block">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Visão geral</span>
+            <h2 id="tituloResumo">Seus principais indicadores</h2>
+          </div>
+          <p id="resumoEvolucao">Comparação com a avaliação anterior.</p>
+        </div>
+        <div id="kpisAvaliacao" class="kpi-grid"></div>
+      </section>
+
+      <section id="evolucaoBox" class="panel section-block hidden" aria-labelledby="tituloEvolucao">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Histórico</span>
+            <h2 id="tituloEvolucao">Evolução ao longo das avaliações</h2>
+          </div>
+          <p>Os gráficos mostram a tendência dos últimos registros, sem substituir a interpretação do profissional.</p>
+        </div>
+        <div id="graficosEvolucao" class="evolucao-grid"></div>
+      </section>
+
+      <section class="panel section-block" aria-labelledby="tituloComparacao">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Antes e agora</span>
+            <h2 id="tituloComparacao">Comparação com a avaliação anterior</h2>
+          </div>
+          <p id="comparacaoInfo">Comparação automática entre os dois últimos registros.</p>
+        </div>
+        <div id="comparacao" class="comparacao-lista"></div>
+      </section>
+
+      <section class="panel section-block" aria-labelledby="tituloResultadoCompleto">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Detalhes</span>
+            <h2 id="tituloResultadoCompleto">Resultado completo</h2>
+          </div>
+          <p>Abra cada seção para consultar os dados registrados pelo professor.</p>
+        </div>
+        <div id="resultadoCompleto" class="resultado-completo"></div>
+      </section>
+
+      <section id="fotosBox" class="panel section-block hidden" aria-labelledby="tituloFotos">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Registro visual</span>
+            <h2 id="tituloFotos">Fotos posturais</h2>
+          </div>
+          <p>Imagens da avaliação atual, quando registradas pelo profissional.</p>
+        </div>
+        <div id="fotosPosturais" class="fotos-grid"></div>
+      </section>
+
+      <aside class="nota-profissional">
+        <div aria-hidden="true">i</div>
+        <p><strong>Leitura responsável:</strong> estes resultados servem para acompanhamento e não substituem avaliação ou orientação individual de um profissional de saúde ou educação física.</p>
+      </aside>
+    </div>
+  </main>
+
+  <script src="/assets/js/fusion-aluno-config.js"></script>
+  <script src="./index.js"></script>
+  <script src="/assets/js/fusion-layout.js" defer></script>
+  <script src="/assets/js/fusion-no-sidebar.js" defer></script>
+</body>
+</html>

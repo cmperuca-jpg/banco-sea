@@ -1,0 +1,1206 @@
+.alunos-page{display:grid;gap:16px}.alunos-header-card{background:#fff;border:1px solid #dbe3ef;border-radius:12px;padding:22px;display:flex;align-items:center;justify-content:space-between;gap:16px}.alunos-header-card h2{margin:0 0 6px}.alunos-header-card p{margin:0;color:#5d6b82}.alunos-actions{display:flex;gap:8px}.fusion-button.secondary{background:#172136}.alunos-kpis{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:14px}.aluno-kpi{background:#fff;border:1px solid #dbe3ef;border-radius:12px;padding:18px}.aluno-kpi span{display:block;color:#65748b;font-size:13px;margin-bottom:8px}.aluno-kpi strong{font-size:28px;color:#071329}.alunos-toolbar{display:grid;grid-template-columns:1fr 180px 220px;gap:14px}.field label{display:block;font-size:13px;font-weight:700;color:#334155;margin-bottom:6px}.field input,.field select,.field textarea{width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:8px;padding:10px 11px;font:inherit;background:#fff}.field textarea{resize:vertical}.field small{display:block;color:#64748b;margin-top:5px;font-size:12px}.alunos-alert{padding:12px 14px;border-radius:10px;border:1px solid #cbd5e1;background:#fff}.alunos-alert.sucesso{border-color:#86efac;background:#f0fdf4;color:#166534}.alunos-alert.erro{border-color:#fecaca;background:#fef2f2;color:#991b1b}.hidden{display:none!important}.table-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.table-top h3{margin:0}.table-top span{color:#64748b;font-size:13px}.table-wrap{overflow-x:auto}.alunos-table{width:100%;border-collapse:collapse}.alunos-table th,.alunos-table td{border-bottom:1px solid #e2e8f0;padding:12px 10px;text-align:left;vertical-align:middle}.alunos-table th{color:#475569;font-size:12px;text-transform:uppercase;letter-spacing:.03em}.alunos-table td small{display:block;color:#64748b;margin-top:2px}.text-right{text-align:right!important;white-space:nowrap}.badge{display:inline-flex;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:700;background:#e2e8f0;color:#334155;text-transform:capitalize}.status-ativo{background:#dcfce7;color:#166534}.status-pendente{background:#fef3c7;color:#756400}.status-inativo,.status-cancelado{background:#fee2e2;color:#991b1b}.btn-row{border:1px solid #cbd5e1;background:#fff;border-radius:7px;padding:7px 10px;cursor:pointer;margin-left:6px;color:#0f172a;min-width:58px}.btn-row:hover{background:#f8fafc}.btn-row.danger{border-color:#fecaca;color:#991b1b}.alunos-pagination{display:flex;justify-content:flex-end;align-items:center;gap:12px;padding-top:14px}.alunos-pagination button,.btn-light{border:1px solid #cbd5e1;background:#fff;border-radius:8px;padding:9px 12px;cursor:pointer;color:#0f172a;min-width:88px}.alunos-pagination button:disabled,#btnSalvarAluno:disabled{opacity:.55;cursor:not-allowed}.modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,.58);display:flex;align-items:center;justify-content:center;z-index:50;padding:24px}.modal-card{width:min(820px,96vw);max-height:92vh;overflow:auto;background:#fff;border-radius:14px;box-shadow:0 24px 80px rgba(0,0,0,.30)}.modal-large{width:min(980px,96vw)}.modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid #e2e8f0}.modal-head h3{margin:0}.modal-head button{border:0;background:#f1f5f9;border-radius:8px;font-size:22px;width:34px;height:34px;cursor:pointer}.tabs{display:flex;gap:8px;padding:12px 20px;border-bottom:1px solid #e2e8f0;background:#f8fafc}.tab{border:1px solid #cbd5e1;background:#fff;color:#0f172a;border-radius:999px;padding:8px 12px;cursor:pointer}.tab.active{background:var(--fusion-primary,#22b8d2);color:#fff;border-color:var(--fusion-primary,#22b8d2)}.tab-panel{display:none}.tab-panel.active{display:grid;gap:14px}.aluno-form{padding:20px;display:grid;gap:14px}.foto-box{display:grid;grid-template-columns:110px 1fr;gap:14px;align-items:center}.foto-preview{width:110px;height:110px;border:1px dashed #94a3b8;border-radius:12px;display:grid;place-items:center;color:#64748b;background:#f8fafc;overflow:hidden}.foto-preview img{width:100%;height:100%;object-fit:cover}.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.grid-3{display:grid;grid-template-columns:1fr 1fr 160px;gap:14px}.modal-actions{display:flex;justify-content:flex-end;gap:10px;padding-top:8px}.historico-top{display:flex;gap:10px;justify-content:flex-end}.timeline{border:1px solid #e2e8f0;border-radius:12px;padding:14px;background:#fff}.timeline-empty{color:#64748b}.timeline-item{display:grid;grid-template-columns:18px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid #f1f5f9}.timeline-item:last-child{border-bottom:0}.timeline-dot{width:10px;height:10px;background:var(--fusion-primary,#22b8d2);border-radius:50%;margin-top:5px}.timeline-item p{margin:3px 0;color:#334155}.timeline-item small{color:#64748b}.integracoes-grid{display:grid;grid-template-columns:repeat(2,minmax(180px,1fr));gap:14px}.integration-card{text-align:left;border:1px solid #dbe3ef;background:#fff;border-radius:12px;padding:18px;cursor:pointer}.integration-card:hover{background:#f8fafc}.integration-card strong{display:block;font-size:18px;color:#0f172a;margin-bottom:5px}.integration-card span{color:#64748b}.hint{color:#64748b}@media(max-width:900px){.alunos-header-card,.alunos-toolbar,.grid-2,.grid-3,.foto-box{grid-template-columns:1fr;display:grid}.alunos-header-card{align-items:stretch}.alunos-kpis,.integracoes-grid{grid-template-columns:1fr 1fr}.alunos-actions{flex-direction:column}.tabs{overflow-x:auto}}@media(max-width:640px){.alunos-kpis,.integracoes-grid{grid-template-columns:1fr}.modal-actions,.historico-top{flex-direction:column}.btn-row{margin-top:4px}}
+.input-with-button{display:grid;grid-template-columns:1fr 42px;gap:6px}
+.input-with-button button{border:1px solid #cbd5e1;background:#fff;border-radius:8px;cursor:pointer;font-size:18px;color:#0f172a}
+.input-with-button button:hover{background:#f8fafc}
+
+/* Fusion Sistema 2.9.3 — Mobile First Alunos */
+.alunos-mobile-cards{display:none}.alunos-bottom-nav{display:none}.aluno-step-btn{display:none}.aluno-mobile-empty{border:1px dashed #cbd5e1;background:#f8fafc;border-radius:14px;padding:18px;text-align:center;color:#64748b;font-weight:800}
+
+@media(max-width:900px){
+  body{background:#f4f6f9!important;}
+  .fusion-content.alunos-page{padding:14px!important;gap:12px;}
+  .alunos-header-card{padding:16px;border-radius:18px;display:grid!important;grid-template-columns:1fr;gap:12px;overflow:hidden;}
+  .alunos-header-card h2{font-size:22px;line-height:1.12;margin:0 0 4px;}
+  .alunos-header-card p{font-size:14px;line-height:1.25;max-height:38px;overflow:hidden;}
+  .alunos-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px;}
+  .alunos-actions .fusion-button{width:100%;min-height:48px;border-radius:14px;}
+  .alunos-kpis{display:flex!important;grid-template-columns:none!important;gap:10px;overflow-x:auto;padding:0 2px 4px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;}
+  .aluno-kpi{min-width:152px;padding:14px;border-radius:16px;scroll-snap-align:start;}
+  .aluno-kpi span{font-size:13px;margin-bottom:8px;}
+  .aluno-kpi strong{font-size:26px;}
+  .alunos-toolbar{display:grid!important;grid-template-columns:1fr!important;gap:10px;position:sticky;top:76px;z-index:12;border-radius:18px;padding:12px;box-shadow:0 12px 30px rgba(15,23,42,.08);}
+  .alunos-toolbar .field label{font-size:12px;}
+  .field input,.field select,.field textarea{min-height:48px;border-radius:13px;font-size:16px;}
+  .alunos-table{display:none!important;}
+  .alunos-mobile-cards{display:grid;gap:10px;}
+  .table-top{margin-bottom:10px;}
+  .table-top h3{font-size:18px;}
+  .alunos-table-card{padding:12px!important;border-radius:18px!important;}
+  .alunos-pagination{justify-content:space-between;gap:8px;}
+  .alunos-pagination button{min-height:46px;border-radius:13px;}
+  .aluno-mobile-card{border:1px solid #e2e8f0;border-left:5px solid #94a3b8;background:#fff;border-radius:18px;padding:13px;display:grid;gap:12px;box-shadow:0 10px 26px rgba(15,23,42,.05);}
+  .aluno-mobile-card.status-ativo{border-left-color:#16a34a;}
+  .aluno-mobile-card.status-pendente,.aluno-mobile-card.status-pre-matriculado{border-left-color:#eab308;}
+  .aluno-mobile-card.status-inativo,.aluno-mobile-card.status-cancelado{border-left-color:#dc2626;}
+  .aluno-mobile-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+  .aluno-mobile-head strong{display:block;font-size:18px;line-height:1.18;color:#0f172a;overflow-wrap:anywhere;}
+  .aluno-mobile-head small{display:block;color:#64748b;margin-top:4px;font-size:13px;overflow-wrap:anywhere;}
+  .aluno-mobile-info{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .aluno-mobile-info div{border:1px solid #e2e8f0;background:#f8fafc;border-radius:12px;padding:9px;min-width:0;}
+  .aluno-mobile-info span{display:block;color:#64748b;font-size:11px;text-transform:uppercase;font-weight:900;}
+  .aluno-mobile-info b{display:block;color:#0f172a;margin-top:3px;font-size:13px;overflow-wrap:anywhere;}
+  .aluno-mobile-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+  .aluno-mobile-actions button{border:1px solid #cbd5e1;background:#fff;color:#0f172a;border-radius:13px;min-height:44px;font-weight:900;}
+  .aluno-mobile-actions button:first-child{background:var(--fusion-primary,#22b8d2);border-color:var(--fusion-primary,#22b8d2);color:#fff;}
+
+  .alunos-bottom-nav{position:fixed;left:10px;right:10px;bottom:10px;z-index:42;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:rgba(255,255,255,.96);border:1px solid #dbe3ef;border-radius:20px;padding:8px;box-shadow:0 16px 50px rgba(15,23,42,.18);backdrop-filter:blur(10px);}
+  .alunos-bottom-nav button{border:0;background:#f8fafc;color:#0f172a;border-radius:15px;min-height:52px;font-weight:900;display:grid;place-items:center;gap:2px;}
+  .alunos-bottom-nav button span{font-size:11px;}
+  .alunos-bottom-nav button[data-alunos-action="novo"]{background:var(--fusion-primary,#22b8d2);color:#fff;}
+  body{padding-bottom:82px;}
+}
+
+@media(max-width:640px){
+  .fusion-content.alunos-page{padding:10px!important;}
+  .alunos-header-card{margin-top:0;padding:14px;}
+  .alunos-actions{grid-template-columns:1fr!important;}
+  .alunos-actions #btnNovoAluno{position:fixed;right:18px;bottom:88px;z-index:41;width:58px;height:58px;min-height:58px;border-radius:999px;padding:0;font-size:0;box-shadow:0 16px 40px rgba(34, 184, 210,.36);}
+  .alunos-actions #btnNovoAluno::before{content:'+';font-size:34px;line-height:1;color:#fff;}
+  .alunos-actions #btnAtualizar{min-height:44px;}
+  .alunos-toolbar{top:74px;}
+  .aluno-mobile-info,.aluno-mobile-actions{grid-template-columns:1fr;}
+
+  .modal-backdrop{padding:0!important;align-items:stretch!important;justify-content:stretch!important;}
+  .modal-card.modal-large{width:100vw!important;height:100dvh!important;max-height:100dvh!important;border-radius:0!important;display:flex;flex-direction:column;overflow:hidden!important;}
+  .modal-head{position:sticky;top:0;z-index:10;background:#fff;padding:14px 14px 10px;}
+  .modal-head h3{font-size:20px;line-height:1.12;}
+  .modal-head h3::after{content:attr(data-step);display:block;margin-top:4px;color:#64748b;font-size:12px;font-weight:900;text-transform:uppercase;}
+  .tabs{position:sticky;top:58px;z-index:9;display:flex!important;overflow-x:auto;padding:8px 12px;background:#eefbfe;border-bottom:1px solid #b9e9f1;gap:6px;}
+  .tab{white-space:nowrap;min-height:38px;padding:8px 10px;border-radius:999px;font-size:13px;}
+  .aluno-form{padding:12px;overflow:auto;flex:1;gap:12px;padding-bottom:92px;}
+  .tab-panel.active{gap:12px;}
+  .grid-2,.grid-3,.foto-box{display:grid!important;grid-template-columns:1fr!important;gap:10px;}
+  .foto-box{justify-items:stretch;}
+  .foto-preview{width:92px;height:92px;justify-self:center;border-radius:18px;}
+  .modal-actions{position:fixed;left:0;right:0;bottom:0;z-index:12;background:#fff;border-top:1px solid #e2e8f0;display:grid!important;grid-template-columns:1fr 1fr;gap:8px;padding:10px!important;box-shadow:0 -14px 36px rgba(15,23,42,.12);}
+  .modal-actions button{width:100%;min-height:48px;border-radius:14px;font-weight:900;}
+  .modal-actions #btnFicha{display:none;}
+  .modal-actions #btnCancelar{grid-column:1/2;}
+  .modal-actions #btnSalvarAluno{grid-column:1/-1;background:#16a34a;}
+  .aluno-step-btn{display:block!important;}
+  .aluno-step-next{background:var(--fusion-primary,#22b8d2)!important;color:#fff!important;border:0!important;}
+  .historico-top{display:grid!important;grid-template-columns:1fr!important;gap:8px;}
+  .integracoes-grid{grid-template-columns:1fr!important;}
+}
+
+
+/* === Fusion Sistema 2.9.3B — Alunos Mobile Fit + Modal sem estouro === */
+html, body { max-width:100%; overflow-x:hidden !important; }
+*, *::before, *::after { box-sizing:border-box; }
+.alunos-page, .alunos-page * { min-width:0; }
+.alunos-header-card p,
+.aluno-mobile-head strong,
+.aluno-mobile-head small,
+.field input,
+.field select,
+.field textarea { overflow-wrap:anywhere; }
+
+@media (max-width: 900px) {
+  .fusion-shell,
+  .fusion-main,
+  .fusion-content,
+  .alunos-page {
+    width:100% !important;
+    max-width:100vw !important;
+    overflow-x:hidden !important;
+  }
+
+  .fusion-main {
+    padding:74px 8px 18px !important;
+    margin:0 !important;
+  }
+
+  .fusion-content.alunos-page {
+    padding:8px !important;
+    gap:10px !important;
+  }
+
+  .alunos-header-card {
+    width:100% !important;
+    max-width:100% !important;
+    padding:14px !important;
+    border-radius:16px !important;
+    gap:10px !important;
+  }
+
+  .alunos-header-card h2 {
+    font-size:20px !important;
+    line-height:1.15 !important;
+  }
+
+  .alunos-header-card p {
+    font-size:13px !important;
+    line-height:1.25 !important;
+    max-height:34px !important;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+  }
+
+  .alunos-actions {
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+    gap:8px !important;
+  }
+
+  .alunos-actions .fusion-button,
+  .alunos-actions button {
+    min-height:44px !important;
+    padding:10px 12px !important;
+    border-radius:13px !important;
+    font-size:14px !important;
+  }
+
+  .alunos-kpis {
+    display:flex !important;
+    flex-wrap:nowrap !important;
+    overflow-x:auto !important;
+    gap:8px !important;
+    padding:0 0 4px !important;
+    margin:0 !important;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .alunos-kpis::-webkit-scrollbar{display:none;}
+
+  .aluno-kpi {
+    flex:0 0 126px !important;
+    min-width:126px !important;
+    max-width:126px !important;
+    min-height:82px !important;
+    padding:12px !important;
+    border-radius:15px !important;
+  }
+
+  .aluno-kpi span { font-size:12px !important; margin-bottom:4px !important; }
+  .aluno-kpi strong { font-size:24px !important; line-height:1.1 !important; }
+
+  .alunos-toolbar {
+    width:100% !important;
+    max-width:100% !important;
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    gap:8px !important;
+    padding:10px !important;
+    border-radius:16px !important;
+    top:72px !important;
+  }
+
+  .alunos-table-card {
+    width:100% !important;
+    max-width:100% !important;
+    padding:10px !important;
+    border-radius:16px !important;
+    overflow:hidden !important;
+  }
+
+  .table-top { align-items:flex-start !important; gap:6px !important; }
+  .table-top h3 { font-size:17px !important; }
+  .table-top span { font-size:12px !important; }
+
+  .alunos-mobile-cards { width:100% !important; max-width:100% !important; }
+  .aluno-mobile-card { width:100% !important; max-width:100% !important; padding:12px !important; border-radius:16px !important; }
+  .aluno-mobile-info { grid-template-columns:1fr 1fr !important; }
+  .aluno-mobile-actions { grid-template-columns:repeat(3, minmax(0, 1fr)) !important; }
+  .aluno-mobile-actions button { min-width:0 !important; padding:8px 6px !important; font-size:13px !important; }
+
+  .alunos-pagination { width:100% !important; justify-content:space-between !important; }
+  .alunos-pagination button { min-width:82px !important; padding:8px 10px !important; }
+}
+
+@media (max-width: 640px) {
+  body.modal-aluno-open { overflow:hidden !important; }
+
+  .fusion-main { padding-left:6px !important; padding-right:6px !important; }
+  .fusion-content.alunos-page { padding:6px !important; }
+
+  .alunos-header-card { padding:12px !important; margin:0 !important; }
+  .alunos-actions { grid-template-columns:1fr 1fr !important; }
+  .alunos-actions #btnAtualizar { display:block !important; }
+  .alunos-actions #btnNovoAluno { position:static !important; width:100% !important; height:auto !important; min-height:44px !important; border-radius:13px !important; padding:10px 12px !important; font-size:14px !important; box-shadow:none !important; }
+  .alunos-actions #btnNovoAluno::before { content:none !important; }
+
+  .aluno-kpi { flex-basis:116px !important; min-width:116px !important; max-width:116px !important; }
+  .aluno-mobile-info,
+  .aluno-mobile-actions { grid-template-columns:1fr !important; }
+
+  /* Modal novo cadastro: ocupa tela, sem estourar lateral */
+  .modal-backdrop {
+    position:fixed !important;
+    inset:0 !important;
+    width:100vw !important;
+    max-width:100vw !important;
+    height:100dvh !important;
+    padding:0 !important;
+    align-items:stretch !important;
+    justify-content:stretch !important;
+    overflow:hidden !important;
+    z-index:9999 !important;
+  }
+
+  .modal-card,
+  .modal-card.modal-large {
+    width:100vw !important;
+    max-width:100vw !important;
+    min-width:0 !important;
+    height:100dvh !important;
+    max-height:100dvh !important;
+    border-radius:0 !important;
+    display:flex !important;
+    flex-direction:column !important;
+    overflow:hidden !important;
+    box-shadow:none !important;
+  }
+
+  .modal-head {
+    flex:0 0 auto !important;
+    min-height:54px !important;
+    padding:10px 12px !important;
+    background:#fff !important;
+    z-index:20 !important;
+  }
+
+  .modal-head h3 { font-size:18px !important; line-height:1.15 !important; }
+  .modal-head button { width:38px !important; height:38px !important; min-width:38px !important; }
+
+  .tabs {
+    flex:0 0 auto !important;
+    top:auto !important;
+    width:100% !important;
+    max-width:100% !important;
+    display:flex !important;
+    overflow-x:auto !important;
+    overflow-y:hidden !important;
+    padding:8px !important;
+    gap:6px !important;
+    background:#eefbfe !important;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab { flex:0 0 auto !important; min-height:38px !important; padding:8px 10px !important; font-size:12px !important; white-space:nowrap !important; }
+
+  .aluno-form {
+    flex:1 1 auto !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-height:0 !important;
+    overflow-y:auto !important;
+    overflow-x:hidden !important;
+    padding:10px 10px 96px !important;
+    gap:10px !important;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .tab-panel,
+  .tab-panel.active,
+  .grid-2,
+  .grid-3,
+  .foto-box,
+  .painel-comercial-matricula,
+  .painel-comercial-matricula .grid-3,
+  .input-with-button,
+  .integracoes-grid,
+  .historico-top {
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    grid-template-columns:1fr !important;
+  }
+
+  .tab-panel.active { display:grid !important; gap:10px !important; }
+  .field { width:100% !important; max-width:100% !important; min-width:0 !important; }
+  .field input,
+  .field select,
+  .field textarea,
+  .input-with-button select,
+  .input-with-button input {
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    min-height:46px !important;
+    border-radius:12px !important;
+    font-size:16px !important;
+  }
+
+  .input-with-button { display:grid !important; grid-template-columns:minmax(0, 1fr) 44px !important; gap:6px !important; }
+  .input-with-button button { width:44px !important; min-width:44px !important; }
+
+  .foto-box { justify-items:center !important; }
+  .foto-preview { width:86px !important; height:86px !important; }
+  .foto-box .field { justify-self:stretch !important; }
+
+  .painel-comercial-matricula {
+    margin:8px 0 !important;
+    padding:10px !important;
+    border-radius:14px !important;
+    overflow:hidden !important;
+  }
+  .painel-comercial-matricula h4 { font-size:16px !important; }
+  .painel-comercial-matricula small { line-height:1.25 !important; }
+
+  .modal-actions {
+    position:fixed !important;
+    left:0 !important;
+    right:0 !important;
+    bottom:0 !important;
+    width:100vw !important;
+    max-width:100vw !important;
+    z-index:10001 !important;
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+    gap:8px !important;
+    padding:8px 10px calc(8px + env(safe-area-inset-bottom)) !important;
+    background:#fff !important;
+    border-top:1px solid #e2e8f0 !important;
+    box-shadow:0 -12px 30px rgba(15,23,42,.16) !important;
+  }
+
+  .modal-actions button { width:100% !important; min-width:0 !important; min-height:46px !important; border-radius:13px !important; padding:8px !important; font-size:14px !important; }
+  .modal-actions #btnFicha { display:none !important; }
+  .modal-actions #btnSalvarAluno { grid-column:1 / -1 !important; background:#16a34a !important; color:#fff !important; }
+
+  .alunos-bottom-nav { left:8px !important; right:8px !important; bottom:8px !important; }
+  body.modal-aluno-open .alunos-bottom-nav,
+  body.modal-aluno-open .alunos-actions #btnNovoAluno { display:none !important; }
+}
+
+@media (max-width: 380px) {
+  .fusion-main { padding-left:4px !important; padding-right:4px !important; }
+  .fusion-content.alunos-page { padding:4px !important; }
+  .aluno-kpi { flex-basis:106px !important; min-width:106px !important; max-width:106px !important; }
+  .modal-actions { grid-template-columns:1fr !important; }
+}
+/* === /Fusion Sistema 2.9.3B === */
+
+
+/* Botão cancelar aluno */
+.btn-row.warning{
+  background:#eab308;
+  color:#ffffff;
+  border-color:#eab308;
+}
+.btn-row.warning:hover{
+  background:#b8a000;
+  border-color:#b8a000;
+}
+.aluno-mobile-actions button.warning{
+  background:#eab308;
+  color:#ffffff;
+  border-color:#eab308;
+}
+.aluno-mobile-actions button.danger{
+  background:#ffffff;
+  color:#991b1b;
+  border-color:#fecaca;
+}
+
+
+/* Reativação operacional */
+.btn-row.success,
+.aluno-mobile-actions .success{
+  background:#16a34a;
+  color:#fff;
+  border-color:#16a34a;
+}
+.btn-row.success:hover,
+.aluno-mobile-actions .success:hover{
+  background:#15803d;
+  border-color:#15803d;
+}
+
+
+/* Regularização de pré-matrícula */
+.badge-status-action{
+  border:0;
+  cursor:pointer;
+  font:inherit;
+}
+.status-pre-matriculado,
+.status-pendente{
+  background:#fef3c7;
+  color:#756400;
+}
+.badge-status-action.status-pre-matriculado{
+  border:1px solid #eab308;
+}
+.badge-status-action.status-pre-matriculado:hover{
+  background:#eab308;
+  color:#fff;
+}
+.btn-row.regularizar,
+.aluno-mobile-actions .regularizar{
+  background:#eab308;
+  color:#fff;
+  border-color:#eab308;
+}
+.btn-row.regularizar:hover,
+.aluno-mobile-actions .regularizar:hover{
+  background:#b8a000;
+  border-color:#b8a000;
+}
+
+/* Fusion Sistema 2.8.0 — Biometria Futronic integrada */
+.biometria-painel{display:grid;gap:16px;border:1px solid #dbe3ef;background:#f8fafc;border-radius:14px;padding:18px}.biometria-cabecalho{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.biometria-cabecalho h4{margin:0 0 5px;font-size:20px}.biometria-cabecalho p{margin:0;color:#64748b}.biometria-badge{display:inline-flex;border-radius:999px;padding:7px 11px;background:#dcfce7;color:#166534;font-size:12px;font-weight:900}.biometria-badge.cadastro{background:#d9f5fa;color:#0b7185}.biometria-identificacao{display:grid;grid-template-columns:2fr 2fr 1fr 1fr;gap:10px}.biometria-identificacao>div,.biometria-capturas>div{border:1px solid #e2e8f0;background:#fff;border-radius:11px;padding:12px;min-width:0}.biometria-identificacao span,.biometria-capturas span{display:block;color:#64748b;font-size:11px;text-transform:uppercase;font-weight:800;margin-bottom:5px}.biometria-identificacao strong,.biometria-identificacao code{overflow-wrap:anywhere}.biometria-mensagem{padding:12px;border-radius:10px;background:#fff;border:1px solid #cbd5e1;color:#334155}.biometria-mensagem.erro{background:#fef2f2;border-color:#fecaca;color:#991b1b}.biometria-mensagem.sucesso{background:#f0fdf4;border-color:#86efac;color:#166534}.biometria-capturas{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.biometria-capturas>div.aceita{border-color:#86efac;background:#f0fdf4}.biometria-capturas>div.rejeitada{border-color:#fecaca;background:#fef2f2}.biometria-acoes{display:flex;flex-wrap:wrap;gap:9px}.biometria-acoes button{min-height:42px}.biometria-danger{border-color:#fecaca!important;color:#991b1b!important}.biometria-acoes button:disabled{opacity:.5;cursor:not-allowed}@media(max-width:900px){.biometria-identificacao{grid-template-columns:1fr 1fr}}@media(max-width:640px){.biometria-identificacao,.biometria-capturas{grid-template-columns:1fr}.biometria-cabecalho{flex-direction:column}.biometria-acoes{display:grid;grid-template-columns:1fr}.biometria-acoes button{width:100%}}
+
+/* A listagem inteira respeita a largura descontada do menu lateral. */
+.alunos-page,
+.alunos-page>*{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+}
+.alunos-page .alunos-kpis{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+}
+.alunos-page :is(.aluno-kpi,.fusion-card,.alunos-toolbar,.alunos-table-card,.table-wrap){
+  min-width:0!important;
+  max-width:100%!important;
+  box-sizing:border-box!important;
+}
+.alunos-page .table-wrap{overflow-x:auto!important}
+@media(max-width:760px){
+  .alunos-page .alunos-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:480px){
+  .alunos-page .alunos-kpis{grid-template-columns:1fr!important}
+}
+
+/* Lista operacional: foto visivel e acoes compactas sem rolagem lateral. */
+.alunos-page .table-wrap{
+  overflow-x:hidden!important;
+}
+.alunos-page .alunos-table{
+  table-layout:fixed!important;
+  min-width:0!important;
+}
+.alunos-page .alunos-table th,
+.alunos-page .alunos-table td{
+  padding:8px 6px!important;
+}
+.alunos-page .alunos-table th:nth-child(1),
+.alunos-page .alunos-table td:nth-child(1){width:34%!important}
+.alunos-page .alunos-table th:nth-child(2),
+.alunos-page .alunos-table td:nth-child(2){width:11%!important}
+.alunos-page .alunos-table th:nth-child(3),
+.alunos-page .alunos-table td:nth-child(3){width:12%!important}
+.alunos-page .alunos-table th:nth-child(4),
+.alunos-page .alunos-table td:nth-child(4){width:10%!important}
+.alunos-page .alunos-table th:nth-child(5),
+.alunos-page .alunos-table td:nth-child(5){width:9%!important}
+.alunos-page .alunos-table th:nth-child(6),
+.alunos-page .alunos-table td:nth-child(6){width:24%!important}
+.aluno-lista-identidade,
+.aluno-mobile-identidade{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+.aluno-lista-texto,
+.aluno-mobile-identidade>div{
+  min-width:0;
+}
+.aluno-lista-texto strong,
+.aluno-lista-texto small{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.aluno-lista-foto{
+  width:32px;
+  height:32px;
+  flex:0 0 32px;
+  border-radius:7px;
+  border:1px solid rgba(125,211,252,.35);
+  object-fit:cover;
+  background:#0f5663;
+  color:#ffffff;
+  display:grid;
+  place-items:center;
+  font-size:11px;
+  font-weight:900;
+  line-height:1;
+}
+.aluno-lista-foto-fallback{
+  text-transform:uppercase;
+}
+.aluno-actions-inline{
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  gap:4px;
+  width:100%;
+}
+.alunos-page .btn-row{
+  min-width:0!important;
+  margin-left:0!important;
+  padding:6px 8px!important;
+  border-radius:6px!important;
+  font-size:11px!important;
+  line-height:1.1!important;
+  font-weight:900!important;
+  white-space:nowrap!important;
+}
+.alunos-page .text-right{
+  white-space:normal!important;
+}
+@media(max-width:1100px){
+  .alunos-page .alunos-table th:nth-child(2),
+  .alunos-page .alunos-table td:nth-child(2){display:none!important}
+  .alunos-page .alunos-table th:nth-child(1),
+  .alunos-page .alunos-table td:nth-child(1){width:38%!important}
+  .alunos-page .alunos-table th:nth-child(6),
+  .alunos-page .alunos-table td:nth-child(6){width:27%!important}
+  .alunos-page .btn-row{padding:6px 7px!important;font-size:10px!important}
+}
+@media(max-width:900px){
+  .aluno-mobile-identidade .aluno-lista-foto{
+    width:40px;
+    height:40px;
+    flex-basis:40px;
+    border-radius:10px;
+  }
+  .aluno-mobile-head{
+    align-items:center!important;
+  }
+}
+
+
+/* Fusion Sistema 2.8.0 — cadastro separado da matrícula */
+.cadastro-sem-matricula{
+  margin:12px 0;
+  padding:16px;
+  border:1px solid #bfdbfe;
+  background:#eff6ff;
+  border-radius:12px;
+}
+.cadastro-sem-matricula strong{
+  display:block;
+  color:#1e3a8a;
+  margin-bottom:6px;
+}
+.cadastro-sem-matricula p{
+  margin:0;
+  color:#334155;
+  line-height:1.45;
+}
+
+/* Fusion Sistema 2.9.3C — contraste dos cartões e navegação móvel */
+@media (max-width:900px){
+  body .fusion-content.alunos-page .aluno-mobile-card{
+    background:#ffffff !important;
+    color:#102630 !important;
+    border-color:#d6e1e5 !important;
+    box-shadow:0 8px 22px rgba(5,28,36,.12) !important;
+    text-shadow:none !important;
+  }
+
+  body .fusion-content.alunos-page .aluno-mobile-card *{
+    text-shadow:none !important;
+  }
+
+  body .fusion-content.alunos-page .aluno-mobile-head strong{
+    color:#102630 !important;
+  }
+
+  body .fusion-content.alunos-page .aluno-mobile-head small{
+    color:#526873 !important;
+    opacity:1 !important;
+  }
+
+  body .fusion-content.alunos-page .aluno-mobile-info > div{
+    background:#f3f7f8 !important;
+    border-color:#d4e0e4 !important;
+  }
+
+  body .fusion-content.alunos-page .aluno-mobile-info span{
+    color:#49616d !important;
+    opacity:1 !important;
+  }
+
+  body .fusion-content.alunos-page .aluno-mobile-info b{
+    color:#102630 !important;
+  }
+
+  body .fusion-content.alunos-page .aluno-mobile-head .badge{
+    background:#e7f3f5 !important;
+    color:#145e6b !important;
+    border-color:#8ab7bf !important;
+  }
+
+  body .fusion-content.alunos-page .aluno-mobile-head .badge.status-ativo{
+    background:#dcfce7 !important;
+    color:#166534 !important;
+    border-color:#86d9a5 !important;
+  }
+
+  body .fusion-content.alunos-page .aluno-mobile-head .badge.status-pendente,
+  body .fusion-content.alunos-page .aluno-mobile-head .badge.status-pre-matriculado{
+    background:#fef3c7 !important;
+    color:#756400 !important;
+    border-color:#e4d55b !important;
+  }
+
+  body .fusion-content.alunos-page .aluno-mobile-head .badge.status-inativo,
+  body .fusion-content.alunos-page .aluno-mobile-head .badge.status-cancelado{
+    background:#fee2e2 !important;
+    color:#991b1b !important;
+    border-color:#f2a6a6 !important;
+  }
+
+  body .fusion-content.alunos-page .aluno-mobile-actions button{
+    text-shadow:none !important;
+  }
+
+  body .fusion-content.alunos-page .aluno-mobile-actions button.danger{
+    background:#ffffff !important;
+    color:#991b1b !important;
+    border-color:#f2a6a6 !important;
+  }
+}
+
+@media (max-width:900px) and (orientation:landscape){
+  body{
+    padding-bottom:62px !important;
+  }
+
+  body .alunos-bottom-nav{
+    left:8px !important;
+    right:8px !important;
+    bottom:5px !important;
+    gap:5px !important;
+    padding:5px !important;
+    border-radius:14px !important;
+  }
+
+  body .alunos-bottom-nav button{
+    min-height:42px !important;
+    padding:4px 7px !important;
+    border-radius:10px !important;
+    font-size:11px !important;
+    line-height:1.05 !important;
+    gap:0 !important;
+  }
+
+  body .alunos-bottom-nav button span{
+    font-size:9.5px !important;
+    line-height:1 !important;
+  }
+}
+/* /Fusion Sistema 2.9.3C */
+
+
+/* ==========================================================================
+   CORREÇÃO — VÍNCULO DE PROFESSOR E CONTRASTE DA ABA MATRÍCULAS
+   ========================================================================== */
+
+#professor_responsavel{
+  width:100%!important;
+  min-height:42px!important;
+  background:#fff!important;
+  color:#0f172a!important;
+  border:1px solid #94a3b8!important;
+  border-radius:10px!important;
+  opacity:1!important;
+}
+
+#professor_responsavel option{
+  background:#fff!important;
+  color:#0f172a!important;
+}
+
+/* O tema premium estava deixando o conteúdo dos cartões quase branco. */
+#tab-matriculas,
+#tab-matriculas *{
+  text-shadow:none!important;
+}
+
+#tab-matriculas .mini-card{
+  background:#f8fafc!important;
+  border:1px solid #b8c7d1!important;
+  color:#0f172a!important;
+  opacity:1!important;
+  box-shadow:0 6px 18px rgba(15,23,42,.08)!important;
+}
+
+#tab-matriculas .mini-card h4,
+#tab-matriculas .mini-card strong{
+  color:#0f172a!important;
+  opacity:1!important;
+}
+
+#tab-matriculas .mini-card p,
+#tab-matriculas .mini-card span:not(.badge){
+  color:#334155!important;
+  opacity:1!important;
+}
+
+#tab-matriculas .mini-card .badge{
+  opacity:1!important;
+}
+
+#tab-matriculas .mini-card .btn-light{
+  background:#fff!important;
+  color:#0f172a!important;
+  border:1px solid #cbd5e1!important;
+  opacity:1!important;
+}
+
+#tab-matriculas .mini-card .btn-light:hover{
+  background:#e2e8f0!important;
+}
+
+#tab-matriculas .timeline-empty{
+  background:#f8fafc!important;
+  color:#334155!important;
+  border:1px dashed #94a3b8!important;
+  padding:16px!important;
+  border-radius:12px!important;
+  opacity:1!important;
+}
+
+
+/* Fusion Sistema — padrão profissional de modal (2026-07-30) */
+html:has(#modalAluno:not(.hidden)),
+body:has(#modalAluno:not(.hidden)){
+  overflow:hidden!important;
+}
+
+#modalAluno.modal-backdrop:not(.hidden){
+  position:fixed!important;
+  inset:0!important;
+  z-index:20050!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:clamp(10px,2vw,24px)!important;
+  overflow:hidden!important;
+  background:rgba(7,24,32,.70)!important;
+  backdrop-filter:blur(3px)!important;
+  -webkit-backdrop-filter:blur(3px)!important;
+}
+
+#modalAluno .modal-card{
+  width:min(1040px,calc(100vw - 28px))!important;
+  max-width:1040px!important;
+  height:auto!important;
+  max-height:calc(100dvh - 28px)!important;
+  margin:0!important;
+  padding:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+  border:1px solid #cfdce3!important;
+  border-radius:16px!important;
+  background:#fff!important;
+  box-shadow:0 28px 90px rgba(2,12,20,.38)!important;
+}
+
+#modalAluno .modal-head{
+  position:relative!important;
+  flex:0 0 auto!important;
+  min-height:62px!important;
+  margin:0!important;
+  padding:12px 18px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:16px!important;
+  border:0!important;
+  border-bottom:1px solid #2d6470!important;
+  background:#153f4b!important;
+  color:#fff!important;
+}
+
+#modalAluno .modal-head h3{
+  margin:0!important;
+  color:#fff!important;
+  font-size:21px!important;
+  line-height:1.2!important;
+  font-weight:800!important;
+  letter-spacing:-.01em!important;
+}
+
+#modalAluno .modal-head #btnFecharModal{
+  flex:0 0 38px!important;
+  width:38px!important;
+  min-width:38px!important;
+  height:38px!important;
+  min-height:38px!important;
+  margin:0!important;
+  padding:0!important;
+  display:grid!important;
+  place-items:center!important;
+  border:1px solid rgba(255,255,255,.28)!important;
+  border-radius:10px!important;
+  background:rgba(255,255,255,.10)!important;
+  color:#fff!important;
+  font-size:24px!important;
+  line-height:1!important;
+  cursor:pointer!important;
+}
+
+#modalAluno .modal-head #btnFecharModal:hover{
+  background:#fff!important;
+  color:#153f4b!important;
+}
+
+#modalAluno .tabs{
+  position:relative!important;
+  top:auto!important;
+  flex:0 0 auto!important;
+  width:100%!important;
+  min-height:54px!important;
+  margin:0!important;
+  padding:8px 16px!important;
+  display:flex!important;
+  align-items:center!important;
+  flex-wrap:nowrap!important;
+  gap:7px!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  border:0!important;
+  border-bottom:1px solid #d9e4e9!important;
+  background:#f4f8fa!important;
+  scrollbar-width:thin!important;
+}
+
+#modalAluno .tabs .tab{
+  flex:0 0 auto!important;
+  width:auto!important;
+  min-width:max-content!important;
+  min-height:38px!important;
+  margin:0!important;
+  padding:8px 13px!important;
+  border:1px solid #c9d8df!important;
+  border-radius:9px!important;
+  background:#fff!important;
+  color:#365261!important;
+  font-size:13px!important;
+  line-height:1!important;
+  font-weight:800!important;
+  white-space:nowrap!important;
+  box-shadow:none!important;
+}
+
+#modalAluno .tabs .tab:hover{
+  border-color:#62bdcc!important;
+  background:#ebf9fb!important;
+  color:#0c7181!important;
+}
+
+#modalAluno .tabs .tab.active{
+  border-color:#1aa9bf!important;
+  background:#22b8d2!important;
+  color:#fff!important;
+  box-shadow:0 4px 12px rgba(34,184,210,.20)!important;
+}
+
+#modalAluno .aluno-form{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  width:100%!important;
+  margin:0!important;
+  padding:18px 20px 0!important;
+  display:grid!important;
+  align-content:start!important;
+  gap:16px!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  background:#f7fafb!important;
+  color:#173343!important;
+  overscroll-behavior:contain!important;
+}
+
+#modalAluno .tab-panel,
+#modalAluno .tab-panel.active{
+  width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:17px!important;
+  border:1px solid #d7e2e7!important;
+  border-radius:12px!important;
+  background:#fff!important;
+  box-shadow:0 5px 18px rgba(28,55,70,.05)!important;
+}
+
+#modalAluno .tab-panel:not(.active){display:none!important}
+#modalAluno .tab-panel.active{display:grid!important;gap:15px!important}
+
+#modalAluno .grid-2,
+#modalAluno .grid-3,
+#modalAluno .foto-box,
+#modalAluno .integracoes-grid{
+  width:100%!important;
+  min-width:0!important;
+  gap:14px!important;
+}
+
+#modalAluno .field{min-width:0!important}
+
+#modalAluno .field label{
+  display:block!important;
+  margin:0 0 6px!important;
+  color:#2e4a5a!important;
+  font-size:12px!important;
+  line-height:1.25!important;
+  font-weight:800!important;
+}
+
+#modalAluno input,
+#modalAluno select,
+#modalAluno textarea{
+  width:100%!important;
+  min-width:0!important;
+  min-height:42px!important;
+  margin:0!important;
+  padding:9px 11px!important;
+  border:1px solid #b9cbd5!important;
+  border-radius:9px!important;
+  background:#fff!important;
+  color:#173343!important;
+  font-size:14px!important;
+  line-height:1.35!important;
+}
+
+#modalAluno textarea{min-height:98px!important;resize:vertical!important}
+
+#modalAluno input:focus,
+#modalAluno select:focus,
+#modalAluno textarea:focus{
+  outline:0!important;
+  border-color:#22b8d2!important;
+  box-shadow:0 0 0 3px rgba(34,184,210,.15)!important;
+}
+
+#modalAluno input[type="file"]{
+  min-height:44px!important;
+  padding:6px!important;
+  color:#425d6d!important;
+}
+
+#modalAluno input[type="file"]::file-selector-button{
+  margin-right:10px!important;
+  padding:8px 11px!important;
+  border:1px solid #aebfc9!important;
+  border-radius:7px!important;
+  background:#eef5f7!important;
+  color:#264555!important;
+  font-weight:800!important;
+  cursor:pointer!important;
+}
+
+#modalAluno .foto-box{
+  display:grid!important;
+  grid-template-columns:96px minmax(0,1fr)!important;
+  align-items:center!important;
+  padding:14px!important;
+  border:1px solid #d6e2e8!important;
+  border-radius:11px!important;
+  background:#f8fbfc!important;
+}
+
+#modalAluno .foto-preview{
+  width:96px!important;
+  height:96px!important;
+  border:1px dashed #88aaba!important;
+  border-radius:12px!important;
+  background:#fff!important;
+}
+
+#modalAluno .modal-actions{
+  position:sticky!important;
+  left:auto!important;
+  right:auto!important;
+  bottom:0!important;
+  z-index:20!important;
+  width:auto!important;
+  min-height:66px!important;
+  margin:2px -20px 0!important;
+  padding:12px 20px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:9px!important;
+  flex-wrap:wrap!important;
+  border-top:1px solid #d4e0e6!important;
+  background:rgba(255,255,255,.97)!important;
+  box-shadow:0 -10px 24px rgba(21,63,75,.08)!important;
+  backdrop-filter:blur(8px)!important;
+}
+
+#modalAluno .modal-actions button{
+  width:auto!important;
+  min-width:120px!important;
+  min-height:40px!important;
+  margin:0!important;
+  padding:9px 14px!important;
+  border-radius:9px!important;
+  font-size:13px!important;
+  line-height:1!important;
+  font-weight:800!important;
+}
+
+#modalAluno .modal-actions .btn-light{
+  border:1px solid #aebfc9!important;
+  background:#fff!important;
+  color:#264555!important;
+}
+
+#modalAluno .modal-actions .btn-light:hover{
+  border-color:#66bcca!important;
+  background:#edf9fb!important;
+  color:#0b7181!important;
+}
+
+#modalAluno .modal-actions #btnSalvarAluno{
+  border:1px solid #1aa9bf!important;
+  background:#22b8d2!important;
+  color:#fff!important;
+}
+
+@media(max-width:820px){
+  #modalAluno.modal-backdrop:not(.hidden){padding:8px!important}
+  #modalAluno .modal-card{width:100%!important;max-height:calc(100dvh - 16px)!important;border-radius:13px!important}
+  #modalAluno .grid-2,#modalAluno .grid-3{grid-template-columns:1fr!important}
+  #modalAluno .aluno-form{padding:12px 12px 0!important}
+  #modalAluno .tab-panel,#modalAluno .tab-panel.active{padding:13px!important}
+  #modalAluno .modal-actions{position:sticky!important;margin:2px -12px 0!important;padding:10px 12px!important}
+}
+
+@media(max-width:640px){
+  #modalAluno.modal-backdrop:not(.hidden){padding:0!important}
+  #modalAluno .modal-card{width:100vw!important;height:100dvh!important;max-height:100dvh!important;border-radius:0!important}
+  #modalAluno .modal-head{min-height:56px!important;padding:9px 12px!important}
+  #modalAluno .modal-head h3{font-size:18px!important}
+  #modalAluno .tabs{padding:7px 9px!important}
+  #modalAluno .aluno-form{padding:10px 10px 0!important}
+  #modalAluno .foto-box{grid-template-columns:1fr!important;justify-items:start!important}
+  #modalAluno .modal-actions{position:sticky!important;display:grid!important;grid-template-columns:1fr 1fr!important;margin:2px -10px 0!important;padding:9px 10px calc(9px + env(safe-area-inset-bottom))!important}
+  #modalAluno .modal-actions button{width:100%!important;min-width:0!important}
+  #modalAluno .modal-actions #btnSalvarAluno{grid-column:1/-1!important}
+}
+
+/* Fusion Sistema — correção pontual do cadastro de alunos.
+   1) preserva contraste das abas contra a regra global de botões;
+   2) remove o helper duplicado criado pelo Fusion Date. */
+#modalAluno .tabs .tab{
+  color:#365261!important;
+  -webkit-text-fill-color:#365261!important;
+}
+
+#modalAluno .tabs .tab:hover{
+  color:#0c7181!important;
+  -webkit-text-fill-color:#0c7181!important;
+}
+
+#modalAluno .tabs .tab.active{
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+}
+
+#modalAluno .field .idade-aluno-resumo{
+  display:block!important;
+  min-height:16px!important;
+  margin-top:5px!important;
+  color:#526d75!important;
+  -webkit-text-fill-color:#526d75!important;
+  font-size:12px!important;
+  font-weight:600!important;
+  line-height:1.3!important;
+}
+
+#modalAluno #data_nascimento ~ .fusion-date-age{
+  display:none!important;
+}
+
+/* Fusion Sistema — contraste definitivo dos botões do cadastro de alunos. */
+#modalAluno .modal-actions button,
+#modalAluno .biometria-acoes button{
+  opacity:1!important;
+  visibility:visible!important;
+  text-indent:0!important;
+  text-shadow:none!important;
+  filter:none!important;
+}
+
+#modalAluno .modal-actions .btn-light,
+#modalAluno .modal-actions #btnFicha,
+#modalAluno .modal-actions #btnCancelar,
+#modalAluno .modal-actions #btnAlunoStepAnterior{
+  border:1px solid #9fb7c3!important;
+  background:#fff!important;
+  color:#244654!important;
+  -webkit-text-fill-color:#244654!important;
+  box-shadow:none!important;
+}
+
+#modalAluno .modal-actions .btn-light:hover,
+#modalAluno .modal-actions #btnFicha:hover,
+#modalAluno .modal-actions #btnCancelar:hover,
+#modalAluno .modal-actions #btnAlunoStepAnterior:hover{
+  border-color:#22b8d2!important;
+  background:#edf9fb!important;
+  color:#086f80!important;
+  -webkit-text-fill-color:#086f80!important;
+}
+
+#modalAluno .modal-actions #btnAlunoStepProximo,
+#modalAluno .modal-actions #btnSalvarAluno{
+  border:1px solid #159eb5!important;
+  background:#22b8d2!important;
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+  box-shadow:0 5px 14px rgba(34,184,210,.18)!important;
+}
+
+#modalAluno .modal-actions #btnAlunoStepProximo:hover,
+#modalAluno .modal-actions #btnSalvarAluno:hover{
+  border-color:#0f879b!important;
+  background:#159eb5!important;
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+}
+
+#modalAluno .modal-actions button:disabled{
+  opacity:.58!important;
+  cursor:not-allowed!important;
+}
+
+#modalAluno .modal-actions #btnAlunoStepAnterior:disabled{
+  background:#f1f5f7!important;
+  color:#607783!important;
+  -webkit-text-fill-color:#607783!important;
+}
+
+#modalAluno .biometria-acoes .btn-light{
+  border:1px solid #159eb5!important;
+  background:#fff!important;
+  color:#08778a!important;
+  -webkit-text-fill-color:#08778a!important;
+}
+
+#modalAluno .biometria-acoes .fusion-button{
+  border:1px solid #159eb5!important;
+  background:#22b8d2!important;
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+}
+
+#modalAluno .biometria-acoes button:disabled{
+  opacity:1!important;
+  border-color:#c6d9e1!important;
+  background:#e8f0f3!important;
+  color:#607783!important;
+  -webkit-text-fill-color:#607783!important;
+  box-shadow:none!important;
+}
+
+#modalAluno .biometria-acoes .biometria-danger{
+  border-color:#e9a8ae!important;
+  background:#fff5f5!important;
+  color:#a82735!important;
+  -webkit-text-fill-color:#a82735!important;
+}

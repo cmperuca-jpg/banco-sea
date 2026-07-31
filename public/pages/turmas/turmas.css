@@ -1,0 +1,396 @@
+.modulo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.modulo-header h2 {
+  margin: 0 0 4px;
+  font-size: 26px;
+}
+
+.modulo-header p {
+  margin: 0;
+  color: #64748b;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  padding: 20px;
+}
+
+.kpi-card span {
+  display: block;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.kpi-card strong {
+  display: block;
+  font-size: 30px;
+  color: #0f172a;
+}
+
+.filtros-card {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 11px 12px;
+  font: inherit;
+}
+
+textarea {
+  resize: vertical;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  color: #64748b;
+  font-size: 13px;
+  padding: 0 8px 12px;
+}
+
+td {
+  padding: 14px 8px;
+  border-top: 1px solid #e2e8f0;
+  color: #334155;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.badge.ativa {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badge.inativa {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.acoes {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-danger,
+.btn-icon {
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background: #0f172a;
+  color: white;
+}
+
+.btn-secondary {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.btn-danger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.btn-icon {
+  background: transparent;
+  font-size: 24px;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+}
+
+.modal-backdrop.aberto {
+  display: flex;
+}
+
+.modal {
+  background: white;
+  width: min(900px, 100%);
+  max-height: 92vh;
+  overflow: auto;
+  border-radius: 18px;
+  padding: 22px;
+}
+
+.modal-header,
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.modal-header {
+  margin-bottom: 18px;
+}
+
+.modal-footer {
+  margin-top: 18px;
+  justify-content: flex-end;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  color: #334155;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 900px) {
+  .kpi-grid,
+  .filtros-card,
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modulo-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+/* Correção definitiva de contraste da página Turmas */
+main.main > .modulo-header h2,
+.main > .modulo-header h2 {
+  color: #17384a !important;
+  -webkit-text-fill-color: #17384a !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+
+main.main > .modulo-header p,
+.main > .modulo-header p {
+  color: #607386 !important;
+  -webkit-text-fill-color: #607386 !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+
+.filtros-card,
+.tabela-card,
+.modal {
+  background: #ffffff !important;
+  color: #152536 !important;
+}
+
+/* Fusion Sistema — modal profissional e responsivo (Turmas) */
+#modalTurma.modal-backdrop {
+  z-index: 30000 !important;
+  padding: 20px !important;
+  overflow: hidden !important;
+  background: rgba(10, 26, 38, 0.68) !important;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+#modalTurma .modal {
+  box-sizing: border-box !important;
+  width: min(900px, calc(100vw - 40px)) !important;
+  max-height: calc(100dvh - 40px) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  border: 1px solid #cbdbe4 !important;
+  border-radius: 18px !important;
+  background: #ffffff !important;
+  box-shadow: 0 26px 70px rgba(2, 18, 28, 0.36) !important;
+}
+
+#modalTurma .modal-header {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 5 !important;
+  min-height: 64px !important;
+  margin: 0 !important;
+  padding: 12px 16px 12px 22px !important;
+  border-bottom: 1px solid #2c6271 !important;
+  background: #164553 !important;
+  color: #ffffff !important;
+}
+
+#modalTurma .modal-header h2 {
+  margin: 0 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  font-size: 23px !important;
+  line-height: 1.2 !important;
+  text-shadow: none !important;
+}
+
+#modalTurma #btnFecharModal {
+  display: inline-grid !important;
+  place-items: center !important;
+  width: 42px !important;
+  min-width: 42px !important;
+  height: 42px !important;
+  padding: 0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.32) !important;
+  border-radius: 11px !important;
+  background: #22b8d2 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  font-size: 27px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+}
+
+#modalTurma #btnFecharModal:hover,
+#modalTurma #btnFecharModal:focus-visible {
+  background: #159db7 !important;
+  outline: 3px solid rgba(34, 184, 210, 0.28) !important;
+  outline-offset: 2px !important;
+}
+
+#modalTurma .form-grid {
+  padding: 20px 22px 4px !important;
+  gap: 15px 16px !important;
+}
+
+#modalTurma .form-grid label,
+#modalTurma .modal > label {
+  margin: 0 !important;
+  color: #213b4d !important;
+  -webkit-text-fill-color: #213b4d !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+}
+
+#modalTurma .modal > label {
+  padding: 0 22px 20px !important;
+}
+
+#modalTurma input,
+#modalTurma select,
+#modalTurma textarea {
+  min-height: 44px !important;
+  border-color: #b9ccda !important;
+  background: #ffffff !important;
+  color: #142d3d !important;
+  -webkit-text-fill-color: #142d3d !important;
+}
+
+#modalTurma textarea {
+  min-height: 92px !important;
+}
+
+#modalTurma .modal-footer {
+  position: sticky !important;
+  bottom: 0 !important;
+  z-index: 5 !important;
+  min-height: 68px !important;
+  margin: 0 !important;
+  padding: 12px 22px !important;
+  border-top: 1px solid #d7e3ea !important;
+  background: rgba(248, 251, 252, 0.98) !important;
+  box-shadow: 0 -8px 20px rgba(15, 35, 48, 0.07) !important;
+}
+
+#modalTurma .modal-footer button {
+  min-width: 112px !important;
+  min-height: 42px !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  font-weight: 800 !important;
+}
+
+#modalTurma .modal-footer .btn-secondary {
+  border: 1px solid #22b8d2 !important;
+  background: #ffffff !important;
+  color: #08788d !important;
+  -webkit-text-fill-color: #08788d !important;
+}
+
+#modalTurma .modal-footer .btn-primary {
+  background: #22b8d2 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+@media (max-width: 640px) {
+  #modalTurma.modal-backdrop {
+    padding: 8px !important;
+  }
+
+  #modalTurma .modal {
+    width: calc(100vw - 16px) !important;
+    max-height: calc(100dvh - 16px) !important;
+    border-radius: 14px !important;
+  }
+
+  #modalTurma .form-grid {
+    grid-template-columns: 1fr !important;
+    padding: 16px 14px 4px !important;
+  }
+
+  #modalTurma .modal > label {
+    padding: 0 14px 16px !important;
+  }
+
+  #modalTurma .modal-footer {
+    padding: 10px 14px !important;
+  }
+
+  #modalTurma .modal-footer button {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+  }
+}

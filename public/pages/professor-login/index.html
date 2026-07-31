@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Login do Professor - Fusion Sistema</title>
+  <link rel="stylesheet" href="./style.css?v=20260728-professor-foto-1">
+  <link rel="manifest" href="/manifest-professor.webmanifest">
+  <meta name="theme-color" content="#2563eb">
+  <link rel="stylesheet" href="/assets/css/fusion-no-sidebar.css">
+  <link rel="stylesheet" href="/assets/css/fusion-app.css">
+  <link rel="stylesheet" href="/assets/css/fusion-theme.css?v=20260730-1">
+</head>
+<body>
+  <main class="prof-login-wrap">
+    <section class="prof-login-card">
+      <div class="brand">Fusion Sistema</div>
+      <h1>Acesso do professor</h1>
+      <p>Área restrita para avaliação física e montagem de treinos. Sem acesso ao painel administrativo do sistema.</p>
+
+      <label>Login
+        <input id="login" autocomplete="username" placeholder="CPF, e-mail, CREF, telefone ou nome">
+      </label>
+      <label>Senha
+        <input id="senha" type="password" autocomplete="current-password" placeholder="Senha do professor">
+      </label>
+
+      <button id="entrar" class="btn primary" type="button">Entrar</button>
+      <div id="mensagem" class="msg"></div>
+      <small class="hint">Use a senha cadastrada. O responsável técnico pode entrar com o login <strong>responsavel-tecnico</strong>.</small>
+    </section>
+  </main>
+  <script src="./index.js?v=20260728-professor-foto-1"></script>
+  <script src="/assets/js/fusion-no-sidebar.js" defer></script>
+  <script src="/assets/pwa/fusion-pwa-install.js" defer></script>
+</body>
+</html>

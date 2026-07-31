@@ -1,0 +1,17 @@
+FUSION ERP - UNIFICAÇÃO DO DASHBOARD COM O BI
+
+Arquivo alterado:
+  public/js/dashboard-home.js
+
+O que muda:
+- Alunos ativos, total de alunos, matrículas ativas e presentes hoje passam a vir de /api/bi/executivo.
+- O Dashboard deixa de recalcular alunos ativos usando diretamente aluno.status.
+- Os gráficos de plano e status passam a usar os dados consolidados do BI.
+- Aniversariantes e últimas avaliações continuam usando os cadastros originais.
+- Nenhuma rotina financeira é alterada.
+
+Instalação:
+1. Extraia este ZIP na raiz do projeto.
+2. Permita substituir public/js/dashboard-home.js.
+3. Faça commit e deploy.
+4. Atualize o navegador com Ctrl+F5.

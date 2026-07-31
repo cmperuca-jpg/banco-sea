@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fusion Sistema - Dashboard</title>
+  
+  <script src="/assets/js/fusion-auth.js"></script>
+  <script>FusionAuth.proteger();</script>
+  <link rel="manifest" href="/manifest-sistema.webmanifest">
+  <meta name="theme-color" content="#22b8d2">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="apple-touch-icon" href="/assets/pwa/icons/fusion-icon-180.png">
+
+  <!-- Fusion Sistema: template global único -->
+  <link rel="stylesheet" href="/assets/css/fusion-app.css?v=20260730-template-unico-1">
+  <link rel="stylesheet" href="/assets/css/fusion-theme.css?v=20260730-template-unico-1">
+  <link rel="stylesheet" href="/assets/css/fusion-menu-global.css?v=20260730-template-unico-1">
+</head>
+<body>
+  <div class="fusion-shell">
+    <main class="fusion-main">
+      <section class="fusion-content">
+        <div class="fusion-grid">
+          <div class="fusion-card"><div class="fusion-kpi-label">Alunos ativos</div><div class="fusion-kpi-value" id="kpiAlunos">0</div><small>Base ativa atual</small></div>
+          <div class="fusion-card"><div class="fusion-kpi-label">Receita liquida do mês</div><div class="fusion-kpi-value" id="kpiReceita">R$ 0,00</div><small>Recebimentos liquidos confirmados</small></div>
+          <div class="fusion-card"><div class="fusion-kpi-label">Mensalidades abertas</div><div class="fusion-kpi-value" id="kpiAbertas">0</div><small>Valores a receber</small></div>
+          <div class="fusion-card"><div class="fusion-kpi-label">Avaliações</div><div class="fusion-kpi-value" id="kpiAvaliacoes">0</div><small>No período</small></div>
+        </div>
+
+        <div id="controleCatracaDashboard" class="fusion-card" style="margin-top:18px; display:none; border-left:4px solid #22b8d2;">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+            <div>
+              <h2 style="margin:0 0 6px;">Controle de acesso</h2>
+              <p style="margin:0;">Liberação manual da catraca para visitante, aluno sem biometria ou necessidade operacional.</p>
+              <small id="statusLiberacaoCatraca" style="display:block; margin-top:8px;">Pronta para liberação manual.</small>
+            </div>
+            <button id="btnLiberarCatracaDashboard" type="button" class="fusion-btn fusion-btn-primary" style="min-width:210px; min-height:48px; font-weight:700;">
+              Liberar catraca
+            </button>
+          </div>
+        </div>
+
+        <div class="fusion-grid" style="margin-top:18px">
+          <div class="fusion-card"><h2>Academia</h2><p>Alunos, professores, turmas, avaliação física, treinos, agenda e check-in.</p></div>
+          <div class="fusion-card"><h2>Financeiro</h2><p>Recebimentos, mensalidades, contas a pagar, caixa, contratos e relatórios.</p></div>
+          <div class="fusion-card"><h2>BI</h2><p>Indicadores de academia, operação e financeiro para análise gerencial.</p></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/assets/js/fusion-layout.js"></script>
+  <script>carregarLayout("Dashboard Executivo");</script>
+  <script src="/assets/js/fusion-date.js" defer></script>
+  <script src="/assets/pwa/fusion-pwa-install.js" defer></script>
+  <script src="index.js" defer></script>
+</body>
+</html>

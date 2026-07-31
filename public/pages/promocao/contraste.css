@@ -1,0 +1,132 @@
+/* Pagina publica da academia - contraste definitivo em superficies claras */
+.benefit-grid article,
+.lead-card,
+.plano,
+.loading{
+  color:#102b35!important;
+}
+
+.benefit-grid article{
+  background:#ffffff!important;
+  border-color:#bfd3d8!important;
+}
+.benefit-grid article h3{
+  color:#102b35!important;
+  opacity:1!important;
+  text-shadow:none!important;
+}
+.benefit-grid article p{
+  color:#45616a!important;
+  opacity:1!important;
+}
+.benefit-grid article>span{
+  color:#1299b2!important;
+  opacity:1!important;
+}
+
+.lead-card{
+  background:#ffffff!important;
+  border-color:#b9cfd5!important;
+}
+.lead-card h2{
+  color:#102b35!important;
+  opacity:1!important;
+  text-shadow:none!important;
+}
+.lead-card .eyebrow{
+  color:#087f91!important;
+  opacity:1!important;
+}
+.lead-card p{
+  color:#45616a!important;
+  opacity:1!important;
+}
+
+.hero-actions{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:18px;
+}
+
+.hero-actions .cta{
+  margin-top:0;
+}
+
+.cta-secondary{
+  background:#0d3340!important;
+  border:1px solid #43c8d7!important;
+}
+
+.plano h3,
+.plano .plano-detalhes,
+.plano .plano-detalhes li,
+.loading{
+  color:#102b35!important;
+  opacity:1!important;
+}
+.plano .plano-tipo,
+.plano .plano-descricao{
+  color:#4b6570!important;
+  opacity:1!important;
+}
+
+.lead-form input,
+.lead-form select,
+.lead-form textarea{
+  background:#082630!important;
+  border-color:#35636e!important;
+  color:#ffffff!important;
+  opacity:1!important;
+}
+.lead-form input::placeholder,
+.lead-form textarea::placeholder{
+  color:#d8e8eb!important;
+  opacity:1!important;
+}
+.lead-form select option{
+  background:#082630!important;
+  color:#ffffff!important;
+}
+.lead-form button{
+  background:#28b8ca!important;
+  color:#ffffff!important;
+  border:1px solid #43c8d7!important;
+  border-radius:2px!important;
+}
+
+.plano-acoes{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:auto;
+}
+
+.plano-acoes .plano-cta{
+  margin-top:0;
+  min-height:42px;
+  display:grid;
+  place-items:center;
+}
+
+.plano-cta-secundaria{
+  background:#0d3340!important;
+  border:1px solid #42c4d4!important;
+  color:#ffffff!important;
+}
+
+.promo-footer,
+.promo-footer strong,
+.promo-footer span,
+.promo-footer a{
+  color:#ffffff!important;
+  opacity:1!important;
+}
+
+@media(max-width:650px){
+  .lead-card h2{font-size:30px!important;line-height:1.08!important}
+  .benefit-grid article{padding:19px!important}
+  .hero-actions{display:grid;grid-template-columns:1fr}
+  .plano-acoes{grid-template-columns:1fr}
+}

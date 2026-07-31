@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fusion Sistema - BI Academia</title>
+
+  <script src="/assets/js/fusion-auth.js"></script>
+  <script>FusionAuth.proteger();</script>
+  <meta name="fusion-existing-pages" content="access-engine,admin,agenda,aluno-avaliacao,aluno-login,aluno-treinos,alunos,avaliacoes,bi-academia,bi-academia-operacional,bi-financeiro,caixa,checkin,comercial,comercial-painel,configuracoes,dashboard,financeiro,matricula-online,matriculas,matriculas-pendentes,mensalidades,modalidades,natacao-professor,planos,professor-area,professor-login,professores,recebimentos,relatorios-caixa,treinos,turmas">
+
+  <link rel="manifest" href="/manifest-sistema.webmanifest">
+  <meta name="theme-color" content="#22b8d2">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="/assets/pwa/icons/fusion-icon-180.png">
+
+  <link rel="stylesheet" href="/assets/css/fusion-app.css?v=20260730-template-unico-1">
+  <link rel="stylesheet" href="/assets/pwa/fusion-pwa-mobile.css">
+  <link rel="stylesheet" href="/assets/css/fusion-mobile-final.css">
+  <link rel="stylesheet" href="/assets/css/fusion-theme.css?v=20260730-padrao-profissional-1">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/bi-academia.css?v=20260730-profissional-1">
+  <link rel="stylesheet" href="/assets/css/fusion-menu-global.css?v=20260730-template-unico-1">
+</head>
+<body class="bi-academia-page">
+
+<main class="main fusion-ui-page bi-academia-main">
+  <section class="fusion-ui-hero bi-academia-hero">
+    <div class="fusion-ui-hero__content">
+      <span class="fusion-ui-eyebrow">Inteligência acadêmica</span>
+      <h1>BI Academia</h1>
+      <p>Visão gerencial de alunos, matrículas, frequência e relacionamento com a academia.</p>
+    </div>
+
+    <div class="fusion-ui-hero__actions">
+      <button class="fusion-ui-btn fusion-ui-btn--secondary" type="button" onclick="exportarCSV()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"/></svg>
+        Exportar CSV
+      </button>
+    </div>
+  </section>
+
+  <section class="fusion-ui-section bi-academia-filters" aria-labelledby="tituloFiltrosAcademia">
+    <div class="fusion-ui-section-header fusion-ui-section-header--compact">
+      <div>
+        <h2 id="tituloFiltrosAcademia">Período analisado</h2>
+        <p>Defina o intervalo para atualizar todos os indicadores e comparativos.</p>
+      </div>
+      <span id="statusAtualizacao" class="fusion-ui-update-status" aria-live="polite">Dados atualizados</span>
+    </div>
+
+    <div class="fusion-ui-filter-grid bi-academia-filter-grid">
+      <label class="fusion-ui-field">
+        <span>Data inicial</span>
+        <input id="filtroInicio" type="date">
+      </label>
+
+      <label class="fusion-ui-field">
+        <span>Data final</span>
+        <input id="filtroFim" type="date">
+      </label>
+
+      <div class="fusion-ui-filter-actions">
+        <button id="btnAtualizar" class="fusion-ui-btn fusion-ui-btn--primary" type="button" onclick="carregarDashboard()">Atualizar painel</button>
+        <button class="fusion-ui-btn fusion-ui-btn--ghost" type="button" onclick="limparFiltros()">Limpar</button>
+      </div>
+    </div>
+
+    <div id="erroDashboard" class="fusion-ui-alert" role="alert" hidden></div>
+  </section>
+
+  <section class="fusion-ui-kpi-grid bi-academia-kpis" aria-label="Indicadores acadêmicos">
+    <article class="fusion-ui-kpi fusion-ui-kpi--primary">
+      <div class="fusion-ui-kpi__top"><span>Total de alunos</span><i aria-hidden="true"></i></div>
+      <strong id="kpiTotalAlunos">0</strong>
+      <small>Base completa cadastrada</small>
+    </article>
+    <article class="fusion-ui-kpi">
+      <div class="fusion-ui-kpi__top"><span>Alunos ativos</span><i aria-hidden="true"></i></div>
+      <strong id="kpiAlunosAtivos">0</strong>
+      <small>Alunos com vínculo ativo</small>
+    </article>
+    <article class="fusion-ui-kpi">
+      <div class="fusion-ui-kpi__top"><span>Alunos novos</span><i aria-hidden="true"></i></div>
+      <strong id="kpiAlunosNovos">0</strong>
+      <small>Cadastros no período</small>
+    </article>
+    <article class="fusion-ui-kpi">
+      <div class="fusion-ui-kpi__top"><span>Matrículas ativas</span><i aria-hidden="true"></i></div>
+      <strong id="kpiMatriculasAtivas">0</strong>
+      <small>Contratos em andamento</small>
+    </article>
+    <article class="fusion-ui-kpi">
+      <div class="fusion-ui-kpi__top"><span>Presenças no período</span><i aria-hidden="true"></i></div>
+      <strong id="kpiPresencasPeriodo">0</strong>
+      <small>Check-ins contabilizados</small>
+    </article>
+    <article class="fusion-ui-kpi fusion-ui-kpi--secondary">
+      <div class="fusion-ui-kpi__top"><span>Presentes hoje</span><i aria-hidden="true"></i></div>
+      <strong id="kpiPresencasHoje">0</strong>
+      <small>Movimento do dia</small>
+    </article>
+    <article class="fusion-ui-kpi fusion-ui-kpi--secondary">
+      <div class="fusion-ui-kpi__top"><span>Check-ins abertos</span><i aria-hidden="true"></i></div>
+      <strong id="kpiCheckinsAbertos">0</strong>
+      <small>Entradas sem encerramento</small>
+    </article>
+    <article class="fusion-ui-kpi fusion-ui-kpi--secondary">
+      <div class="fusion-ui-kpi__top"><span>Matrículas trancadas</span><i aria-hidden="true"></i></div>
+      <strong id="kpiMatriculasTrancadas">0</strong>
+      <small>Vínculos temporariamente pausados</small>
+    </article>
+    <article class="fusion-ui-kpi fusion-ui-kpi--secondary">
+      <div class="fusion-ui-kpi__top"><span>Matrículas canceladas</span><i aria-hidden="true"></i></div>
+      <strong id="kpiMatriculasCanceladas">0</strong>
+      <small>Cancelamentos registrados</small>
+    </article>
+  </section>
+
+  <section class="fusion-ui-dashboard-section" aria-labelledby="tituloEvolucaoAcademia">
+    <div class="fusion-ui-section-header">
+      <div>
+        <span class="fusion-ui-eyebrow">Evolução</span>
+        <h2 id="tituloEvolucaoAcademia">Movimento da academia</h2>
+        <p>Comparativo mensal de presença e novas matrículas.</p>
+      </div>
+    </div>
+
+    <div class="fusion-ui-chart-grid">
+      <article class="fusion-ui-chart-card">
+        <div class="fusion-ui-card-header">
+          <div><h3>Presenças por mês</h3><p>Volume de acessos registrados ao longo do período.</p></div>
+        </div>
+        <div class="fusion-ui-chart-frame"><canvas id="graficoPresencas"></canvas><div class="fusion-ui-chart-empty" data-empty-for="graficoPresencas" hidden></div></div>
+      </article>
+
+      <article class="fusion-ui-chart-card">
+        <div class="fusion-ui-card-header">
+          <div><h3>Matrículas por mês</h3><p>Entrada de novos vínculos acadêmicos.</p></div>
+        </div>
+        <div class="fusion-ui-chart-frame"><canvas id="graficoMatriculas"></canvas><div class="fusion-ui-chart-empty" data-empty-for="graficoMatriculas" hidden></div></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="fusion-ui-dashboard-section" aria-labelledby="tituloDistribuicaoAcademia">
+    <div class="fusion-ui-section-header">
+      <div>
+        <span class="fusion-ui-eyebrow">Distribuição</span>
+        <h2 id="tituloDistribuicaoAcademia">Perfil da base ativa</h2>
+        <p>Planos contratados e concentração geográfica dos alunos.</p>
+      </div>
+    </div>
+
+    <div class="fusion-ui-chart-grid">
+      <article class="fusion-ui-chart-card">
+        <div class="fusion-ui-card-header">
+          <div><h3>Alunos por plano</h3><p>Participação de cada plano na base cadastrada.</p></div>
+        </div>
+        <div class="fusion-ui-chart-frame fusion-ui-chart-frame--doughnut"><canvas id="graficoPlanos"></canvas><div class="fusion-ui-chart-empty" data-empty-for="graficoPlanos" hidden></div></div>
+      </article>
+
+      <article class="fusion-ui-chart-card">
+        <div class="fusion-ui-card-header">
+          <div><h3>Alunos por cidade</h3><p>Principais cidades de origem dos alunos.</p></div>
+        </div>
+        <div class="fusion-ui-chart-frame"><canvas id="graficoCidades"></canvas><div class="fusion-ui-chart-empty" data-empty-for="graficoCidades" hidden></div></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="fusion-ui-dashboard-section" aria-labelledby="tituloFrequenciaAcademia">
+    <div class="fusion-ui-section-header">
+      <div>
+        <span class="fusion-ui-eyebrow">Frequência</span>
+        <h2 id="tituloFrequenciaAcademia">Rankings de utilização</h2>
+        <p>Alunos e turmas com maior volume de presença.</p>
+      </div>
+    </div>
+
+    <div class="fusion-ui-table-grid">
+      <article class="fusion-ui-table-card">
+        <div class="fusion-ui-card-header"><div><h3>Frequência por aluno</h3><p>Ranking individual de presenças.</p></div></div>
+        <div id="rankingAlunos" class="fusion-ui-table-content">Carregando...</div>
+      </article>
+
+      <article class="fusion-ui-table-card">
+        <div class="fusion-ui-card-header"><div><h3>Frequência por turma</h3><p>Turmas com maior movimentação.</p></div></div>
+        <div id="rankingTurmas" class="fusion-ui-table-content">Carregando...</div>
+      </article>
+    </div>
+  </section>
+
+  <section class="fusion-ui-table-card">
+    <div class="fusion-ui-card-header">
+      <div><span class="fusion-ui-eyebrow">Acompanhamento</span><h2>Alunos ativos sem presença registrada</h2><p>Base que pode exigir contato, orientação ou revisão de vínculo.</p></div>
+    </div>
+    <div id="alunosSemPresenca" class="fusion-ui-table-content">Carregando...</div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/js/bi-academia/index.js?v=20260730-profissional-1"></script>
+<script src="/assets/js/fusion-layout.js"></script>
+<script src="/assets/pwa/fusion-pwa-install.js" defer></script>
+<script src="/assets/js/fusion-mobile-final.js" defer></script>
+</body>
+</html>

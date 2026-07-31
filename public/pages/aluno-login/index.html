@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Acesso do Aluno - Fusion Sistema</title>
+  <link rel="manifest" href="/manifest-aluno.webmanifest">
+  <meta name="theme-color" content="#14b8d4">
+  <link rel="stylesheet" href="/assets/css/fusion-no-sidebar.css">
+  <link rel="stylesheet" href="/assets/css/fusion-app.css">
+  <link rel="stylesheet" href="/assets/css/fusion-theme.css?v=20260730-1">
+  <link rel="stylesheet" href="/pages/aluno-login/style.css?v=20260730-portal-aluno-1">
+</head>
+<body class="aluno-login-page">
+  <main class="login-wrap">
+    <section class="login-intro" aria-label="Portal do aluno">
+      <img class="login-logo" src="/assets/brand/fusion-sistema-logo.svg" alt="Fusion Sistema">
+      <span class="login-eyebrow">Portal do aluno</span>
+      <h1>Seu treino, seus pagamentos e sua evolução em um só lugar.</h1>
+      <p>Acesse com os dados cadastrados na academia. O portal funciona no computador e no celular.</p>
+      <div class="login-beneficios" aria-label="Recursos disponíveis">
+        <span>Treino atualizado</span>
+        <span>Avaliação física</span>
+        <span>Pagamento via Pix</span>
+      </div>
+    </section>
+
+    <section class="login-card" aria-labelledby="tituloLoginAluno">
+      <div class="login-card-head">
+        <span class="login-card-kicker">Área segura</span>
+        <h2 id="tituloLoginAluno">Entrar no portal</h2>
+        <p>Use CPF, matrícula, e-mail ou telefone.</p>
+      </div>
+
+      <form id="loginFormAluno" novalidate>
+        <label for="login">Login</label>
+        <input id="login" autocomplete="username" placeholder="CPF, matrícula, e-mail ou telefone" required>
+
+        <label for="senha">Senha</label>
+        <div class="campo-senha">
+          <input id="senha" type="password" autocomplete="current-password" placeholder="Senha do aluno" required>
+          <button id="alternarSenha" class="botao-senha" type="button" aria-label="Mostrar senha" aria-pressed="false">
+            <span class="icone-olho" aria-hidden="true"></span>
+          </button>
+        </div>
+
+        <button id="entrar" class="btn primary" type="submit">Entrar</button>
+        <div id="mensagem" class="msg" role="alert" aria-live="polite"></div>
+      </form>
+
+      <details class="ajuda-login">
+        <summary>Não lembra a senha?</summary>
+        <p>Use a senha cadastrada no aluno. Quando não houver senha definida, o sistema também pode aceitar CPF completo, os 4 últimos dígitos do CPF ou a data de nascimento no formato DDMMAAAA.</p>
+      </details>
+    </section>
+  </main>
+
+  <script src="/assets/js/fusion-aluno-config.js?v=20260730-1"></script>
+  <script src="/assets/js/fusion-aluno-sessao-unica.js?v=20260727-1"></script>
+  <script src="/pages/aluno-login/index.js?v=20260730-portal-aluno-1"></script>
+  <script src="/assets/js/fusion-no-sidebar.js" defer></script>
+  <script src="/assets/pwa/fusion-pwa-install.js" defer></script>
+</body>
+</html>

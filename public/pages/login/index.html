@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fusion Sistema - Login</title>
+  <link rel="stylesheet" href="/assets/css/fusion-app.css">
+  <link rel="stylesheet" href="/pages/login/style.css">
+  <script src="/assets/js/fusion-auth.js" defer></script>
+  <script src="/pages/login/index.js" defer></script>
+  <link rel="manifest" href="/manifest-sistema.webmanifest">
+  <meta name="theme-color" content="#22b8d2">
+  <link rel="apple-touch-icon" href="/assets/pwa/icons/fusion-sistema-180.png">
+  <link rel="stylesheet" href="/assets/css/fusion-premium-final.css">
+</head>
+<body class="login-page">
+  <form class="login-card" id="loginForm" autocomplete="on">
+    <h1>Fusion Sistema</h1>
+    <div class="sub">Entrar no sistema</div>
+
+    <label class="sr-only" for="email">E-mail</label>
+    <input id="email" name="email" type="email" placeholder="E-mail" autocomplete="username" required>
+
+    <label class="sr-only" for="senha">Senha</label>
+    <input id="senha" name="senha" type="password" placeholder="Senha" autocomplete="current-password" required>
+
+    <button id="btnEntrar" type="submit">Entrar</button>
+    <div id="erro" class="erro" role="alert"></div>
+    <div class="versao">Fusion Sistema · Autenticação segura Supabase</div>
+  </form>
+  <script src="/assets/pwa/fusion-pwa-install.js" defer></script>
+</body>
+</html>

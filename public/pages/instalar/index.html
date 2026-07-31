@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#22b8d2">
+  <title>Instalar Fusion Sistema</title>
+  <link rel="manifest" href="/manifest-sistema.webmanifest">
+  <link rel="icon" href="/assets/pwa/icons/fusion-sistema-192.png">
+  <link rel="stylesheet" href="/assets/css/fusion-app.css">
+  <link rel="stylesheet" href="/assets/css/fusion-theme.css">
+  <style>
+    body{margin:0;background:#eef4f7;color:#15384b;font-family:Arial,Helvetica,sans-serif}
+    .install-page{width:min(1080px,calc(100% - 32px));margin:0 auto;padding:38px 0 60px}
+    .install-hero,.install-card{border:1px solid #d8e2ea;border-radius:18px;background:#fff;box-shadow:0 10px 30px rgba(15,40,55,.08)}
+    .install-hero{display:grid;grid-template-columns:1fr auto;gap:28px;align-items:center;padding:32px}
+    .install-logo{width:82px;height:82px}
+    h1{margin:0 0 10px;font-size:clamp(30px,5vw,46px);color:#12384b}
+    p{color:#607386;line-height:1.55}
+    .install-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:20px}
+    .install-card{padding:25px}
+    .install-card h2{margin:0 0 8px;color:#15384b;font-size:23px}
+    .install-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+    .install-btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 20px;border:1px solid #22b8d2;border-radius:11px;background:#22b8d2;color:#fff;font-weight:800;text-decoration:none;cursor:pointer}
+    .install-btn.secondary{background:#fff;color:#11879b}
+    .steps{margin:18px 0 0;padding-left:22px;color:#425d6e;line-height:1.75}
+    .status{min-height:24px;margin-top:12px;color:#527080;font-size:13px}
+    @media(max-width:760px){.install-page{width:min(100% - 20px,1080px);padding-top:18px}.install-hero{grid-template-columns:1fr;padding:24px}.install-logo{width:64px;height:64px}.install-grid{grid-template-columns:1fr}.install-card{padding:21px}}
+  </style>
+</head>
+<body>
+  <main class="install-page">
+    <section class="install-hero">
+      <div>
+        <span style="color:#118ca3;font-size:12px;font-weight:900;letter-spacing:.12em">FUSION SISTEMA</span>
+        <h1>Instale no celular ou no computador</h1>
+        <p>Use a PWA para acessar pelo celular e o aplicativo Windows no computador que controla a operação local e a catraca.</p>
+      </div>
+      <img class="install-logo" src="/assets/pwa/icons/fusion-sistema-192.png" alt="Fusion Sistema">
+    </section>
+
+    <section class="install-grid">
+      <article class="install-card">
+        <h2>Celular e tablet</h2>
+        <p>Instala a PWA sem loja de aplicativos. Depois da instalação, o Fusion Sistema aparece na tela inicial.</p>
+        <ol class="steps">
+          <li>Abra esta página no Chrome ou Edge.</li>
+          <li>Toque em <strong>Instalar PWA</strong>.</li>
+          <li>Entre com o usuário da academia.</li>
+        </ol>
+        <div class="install-actions">
+          <button class="install-btn" id="btnInstalarPwa" type="button">Instalar PWA</button>
+          <a class="install-btn secondary" href="/pages/login/index.html">Abrir no navegador</a>
+        </div>
+        <div class="status" id="pwaStatus"></div>
+      </article>
+
+      <article class="install-card">
+        <h2>Computador Windows</h2>
+        <p>O instalador configura o sistema local, cria atalhos e inicia o Fusion Sistema junto com o Windows.</p>
+        <ol class="steps">
+          <li>Baixe o instalador.</li>
+          <li>Execute <strong>FusionSistema-Setup.exe</strong>.</li>
+          <li>Entre com e-mail e senha.</li>
+        </ol>
+        <div class="install-actions">
+          <a class="install-btn" href="https://github.com/cmperuca-jpg/fusion-erp/releases/latest/download/FusionSistema-Setup.exe">Baixar para Windows</a>
+        </div>
+        <div class="status">O cliente final não precisa instalar Node.js nem configurar o Supabase.</div>
+      </article>
+    </section>
+  </main>
+
+  <script src="/assets/pwa/fusion-pwa-install.js" defer></script>
+  <script>
+    let eventoInstalacao = null;
+    const botao = document.getElementById('btnInstalarPwa');
+    const status = document.getElementById('pwaStatus');
+    window.addEventListener('beforeinstallprompt', evento => {
+      evento.preventDefault();
+      eventoInstalacao = evento;
+      status.textContent = 'Instalação disponível neste dispositivo.';
+    });
+    botao.addEventListener('click', async () => {
+      if (eventoInstalacao) {
+        eventoInstalacao.prompt();
+        await eventoInstalacao.userChoice;
+        eventoInstalacao = null;
+        return;
+      }
+      status.textContent = 'No navegador, abra o menu e escolha “Instalar aplicativo” ou “Adicionar à tela inicial”.';
+    });
+    window.addEventListener('appinstalled', () => { status.textContent = 'Fusion Sistema instalado.'; });
+  </script>
+</body>
+</html>

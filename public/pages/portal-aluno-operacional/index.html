@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Fusion Sistema - Portal do Aluno</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+
+<link rel="manifest" href="/manifest-aluno.webmanifest">
+<meta name="theme-color" content="#16a34a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="/assets/pwa/icons/fusion-icon-180.png">
+
+  
+  <script src="/assets/js/fusion-auth.js"></script>
+  <script>FusionAuth.proteger();</script>
+
+  <!-- Fusion Sistema: template global único -->
+  <link rel="stylesheet" href="/assets/css/fusion-app.css?v=20260730-template-unico-1">
+  <link rel="stylesheet" href="/assets/pwa/fusion-pwa-mobile.css">
+  <link rel="stylesheet" href="/assets/css/fusion-theme.css?v=20260730-template-unico-1">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="/assets/css/fusion-menu-global.css?v=20260730-template-unico-1">
+</head>
+<body>
+  <main class="page">
+    <header class="top">
+      <div>
+        <h1>Portal do Aluno</h1>
+        <p>Serviços, agenda, frequência, treinos, avaliações e financeiro.</p>
+      </div>
+      <a href="/pages/dashboard/index.html">Voltar</a>
+    </header>
+
+    <section class="card filtros">
+      <label>ID do aluno
+        <input id="alunoId" placeholder="Cole o ID do aluno">
+      </label>
+      <label>Data
+        <input id="data" type="date">
+      </label>
+      <button id="btnCarregar">Carregar</button>
+    </section>
+
+    <section id="resumo" class="grid"></section>
+
+    <section class="cols">
+      <div class="card">
+        <h2>Agenda de hoje</h2>
+        <div id="agendaHoje"></div>
+      </div>
+      <div class="card">
+        <h2>Serviços contratados</h2>
+        <div id="servicos"></div>
+      </div>
+    </section>
+
+    <section class="cols">
+      <div class="card">
+        <h2>Treinos</h2>
+        <div id="treinos"></div>
+      </div>
+      <div class="card">
+        <h2>Financeiro</h2>
+        <div id="financeiro"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Frequência recente</h2>
+      <div id="frequencia"></div>
+    </section>
+  </main>
+  <script src="./index.js"></script>
+
+<script src="/assets/pwa/fusion-pwa-install.js" defer></script>
+  <script src="/assets/js/fusion-layout.js"></script>
+</body>
+</html>

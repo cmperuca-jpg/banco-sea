@@ -1,0 +1,44 @@
+FUSION ACCESS - INSTALACAO SIMPLES
+
+1. No Fusion Sistema, abra Catracas e clique em Instalar agente.
+2. Clique em Gerar codigo.
+3. No computador da academia, abra FusionAccessSetup.exe.
+4. Clique em Avancar, informe o codigo de 8 numeros e conclua.
+
+O codigo de 8 numeros ativa o computador Windows no site do Fusion.
+Ele nao e o codigo do celular.
+
+Para conferir a instalacao, abra o atalho Status do Fusion Access na area de trabalho.
+
+RECONHECIMENTO FACIAL LOCAL
+
+O reconhecimento facial atual usa motor nativo Windows.
+Nao usa Linux, Docker nem CompreFace.
+
+Para usar o app Android local:
+
+1. Abra Status do Fusion Access.
+2. Confirme que o terminal local respondeu.
+3. Use o IP local mostrado na tela.
+4. Use o codigo de pareamento de 6 numeros mostrado na tela.
+5. No app Android, informe o IP e o codigo.
+
+O app Android local conecta no computador pela porta 8765.
+Se aparecer erro failed to connect to IP:8765, o terminal local nao esta ativo no computador.
+
+RECONHECIMENTO FACIAL PELO SITE
+
+Para usar o terminal web/PWA do celular:
+
+1. No Fusion, abra Reconhecimento facial.
+2. Clique em Configurar celular.
+3. Use o codigo web de 6 numeros.
+4. No celular, abra:
+   https://www.fusionsistema.com.br/pages/reconhecimento-facial/index.html
+
+IMPORTANTE
+
+Mantenha o modo facial em homologacao ate validar iluminacao, posicionamento do celular,
+taxa de falso aceite e procedimento alternativo de acesso.
+
+Biometria facial exige consentimento/base legal, controle de acesso e alternativa de entrada.

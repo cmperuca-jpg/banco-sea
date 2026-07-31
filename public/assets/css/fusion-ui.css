@@ -1,0 +1,3 @@
+/* Compatibilidade: a antiga camada Fusion UI foi desativada.
+   O layout global agora pertence a fusion-app.css e o tema a fusion-theme.css.
+   Este arquivo permanece vazio para que referências antigas não quebrem páginas. */

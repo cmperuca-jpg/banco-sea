@@ -1,0 +1,878 @@
+if (typeof carregarLayout === "function") carregarLayout("Financeiro");
+
+const API = "/api/financeiro";
+const API_LEDGER = "/api/financeiro/ledger";
+const API_TAXAS = "/api/financeiro/taxas-cartao";
+const API_ALUNOS = "/api/alunos";
+const API_FORNECEDORES = "/api/fornecedores";
+
+const TAXAS_CARTAO_TESTE = [
+  { bandeira: "Mastercard", modalidade: "debito", parcelas: 1, percentual: 1.09, taxaFixa: 0, descricao: "Débito Mastercard" },
+  { bandeira: "Mastercard", modalidade: "credito", parcelas: 1, percentual: 2.99, taxaFixa: 0, descricao: "Crédito Mastercard 1x" },
+  { bandeira: "Mastercard", modalidade: "credito", parcelas: 2, percentual: 4.05, taxaFixa: 0, descricao: "Crédito Mastercard 2x" },
+  { bandeira: "Visa", modalidade: "debito", parcelas: 1, percentual: 1.15, taxaFixa: 0, descricao: "Débito Visa" },
+  { bandeira: "Visa", modalidade: "credito", parcelas: 1, percentual: 3.05, taxaFixa: 0, descricao: "Crédito Visa 1x" },
+  { bandeira: "Visa", modalidade: "credito", parcelas: 2, percentual: 4.15, taxaFixa: 0, descricao: "Crédito Visa 2x" },
+  { bandeira: "Elo", modalidade: "debito", parcelas: 1, percentual: 1.35, taxaFixa: 0, descricao: "Débito Elo" },
+  { bandeira: "Elo", modalidade: "credito", parcelas: 1, percentual: 3.35, taxaFixa: 0, descricao: "Crédito Elo 1x" },
+  { bandeira: "Elo", modalidade: "credito", parcelas: 2, percentual: 4.45, taxaFixa: 0, descricao: "Crédito Elo 2x" },
+  { bandeira: "Hipercard", modalidade: "credito", parcelas: 1, percentual: 3.49, taxaFixa: 0, descricao: "Crédito Hipercard 1x" },
+  { bandeira: "Hipercard", modalidade: "credito", parcelas: 2, percentual: 4.75, taxaFixa: 0, descricao: "Crédito Hipercard 2x" },
+  { bandeira: "American Express", modalidade: "credito", parcelas: 1, percentual: 3.85, taxaFixa: 0, descricao: "Crédito Amex 1x" },
+  { bandeira: "American Express", modalidade: "credito", parcelas: 2, percentual: 5.10, taxaFixa: 0, descricao: "Crédito Amex 2x" },
+  { bandeira: "PIX", modalidade: "pix", parcelas: 1, percentual: 0.99, taxaFixa: 0, descricao: "PIX recebido" },
+  { bandeira: "Boleto", modalidade: "boleto", parcelas: 1, percentual: 0, taxaFixa: 3.49, descricao: "Boleto emitido" }
+];
+
+const els = {
+  tabela: document.getElementById("tabelaFinanceiro"),
+  modal: document.getElementById("modalFinanceiro"),
+  form: document.getElementById("formFinanceiro"),
+  modalTitulo: document.getElementById("modalTitulo"),
+  busca: document.getElementById("busca"),
+  filtroTipo: document.getElementById("filtroTipo"),
+  filtroStatus: document.getElementById("filtroStatus"),
+  kpiReceitasPagas: document.getElementById("kpiReceitasPagas"),
+  kpiReceitasAbertas: document.getElementById("kpiReceitasAbertas"),
+  kpiDespesasAbertas: document.getElementById("kpiDespesasAbertas"),
+  kpiSaldoPrevisto: document.getElementById("kpiSaldoPrevisto"),
+  kpiCaixaReal: document.getElementById("kpiCaixaReal"),
+  listaPessoasFinanceiro: document.getElementById("listaPessoasFinanceiro"),
+  modalBaixa: document.getElementById("modalBaixaFinanceiro"),
+  formBaixa: document.getElementById("formBaixaFinanceiro"),
+  resumoBaixa: document.getElementById("resumoBaixa"),
+  painelCartao: document.getElementById("painelCartao"),
+  modalTaxas: document.getElementById("modalTaxasCartao"),
+  tabelaTaxas: document.getElementById("tabelaTaxasCartao")
+};
+
+let lancamentos = [];
+let taxasCartao = [];
+let alunosFinanceiro = [];
+let fornecedoresFinanceiro = [];
+let opcoesPessoasFinanceiro = [];
+let baixaAtual = null;
+let baixaAutomaticaUrlProcessada = false;
+let filtroIndicador = '';
+
+function limparParametrosBaixaDaUrl() {
+  const params = new URLSearchParams(location.search);
+  const chaves = ["financeiroId", "financeiroid", "lancamentoId", "mensalidadeId", "mensalidadeid", "id", "receberAgora", "origem"];
+  let alterou = false;
+  chaves.forEach((chave) => {
+    if (params.has(chave)) {
+      params.delete(chave);
+      alterou = true;
+    }
+  });
+  if (!alterou) return;
+  const novaUrl = `${location.pathname}${params.toString() ? `?${params.toString()}` : ""}${location.hash || ""}`;
+  history.replaceState({}, document.title, novaUrl);
+}
+
+function lancamentoPago(item) {
+  const st = String(item?.status || "").toLowerCase();
+  const programado = ["programado", "programada", "agendado", "agendada", "previsto", "prevista"].includes(st) || item?.programado === true || item?.previsto === true;
+  return !programado && (["pago", "recebido", "quitado", "baixado"].includes(st) || saldoLancamento(item) <= 0);
+}
+
+function moeda(valor) {
+  return Number(valor || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+function hojeISO() { return new Date().toISOString().slice(0, 10); }
+function numero(valor) { const n = Number(String(valor ?? "").replace(",", ".")); return Number.isFinite(n) ? n : 0; }
+function valor(id) { return document.getElementById(id).value; }
+function setValor(id, value) { const el = document.getElementById(id); if (el) el.value = value ?? ""; }
+function statusClasse(status) { return String(status || "").toLowerCase(); }
+function escapeHtml(v) { return String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function normalizarTexto(v) { return String(v || "").trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(); }
+function listaPayload(payload, chave) {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.[chave])) return payload[chave];
+  if (Array.isArray(payload?.dados)) return payload.dados;
+  if (Array.isArray(payload?.data)) return payload.data;
+  return [];
+}
+function nomeAlunoFinanceiro(aluno = {}) { return aluno.nome || aluno.nomeCompleto || aluno.aluno || aluno.name || ""; }
+function nomeFornecedorFinanceiro(fornecedor = {}) { return fornecedor.nome || fornecedor.razaoSocial || fornecedor.fantasia || fornecedor.fornecedor || ""; }
+async function obterMensagemErroResposta(resp, fallback = "Erro na operação.") {
+  let texto = "";
+  try { texto = await resp.text(); } catch { texto = ""; }
+
+  if (texto) {
+    try {
+      const json = JSON.parse(texto);
+      return json.mensagem || json.erro || json.message || fallback;
+    } catch {
+      const limpo = texto.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+      if (limpo) return limpo.slice(0, 220);
+    }
+  }
+
+  if (resp.status === 400) return "Operação não permitida. Verifique os dados e tente novamente.";
+  if (resp.status === 404) return "Registro não encontrado. Atualize a tela e tente novamente.";
+  if (resp.status >= 500) return "Erro interno no servidor. Verifique o terminal do npm start.";
+  return fallback;
+}
+
+async function verificarCaixaAbertoAntesDaBaixa() {
+  try {
+    const resp = await fetch("/api/caixa/atual", { cache: "no-store" });
+    if (!resp.ok) return { ok: true };
+    const json = await resp.json().catch(() => ({}));
+    if (json.aberto === false) {
+      return {
+        ok: false,
+        mensagem: "Não existe caixa aberto. Abra o caixa antes de confirmar um recebimento."
+      };
+    }
+    return { ok: true };
+  } catch {
+    return { ok: true };
+  }
+}
+
+
+function formaEhCartao(forma) {
+  return String(forma || "").toLowerCase().includes("cart");
+}
+
+function formaEhPix(forma) {
+  return String(forma || "").toLowerCase().includes("pix");
+}
+
+function formaEhBoleto(forma) {
+  return String(forma || "").toLowerCase().includes("boleto");
+}
+
+function formaTemTaxaOperadora(forma) {
+  return formaEhCartao(forma) || formaEhPix(forma) || formaEhBoleto(forma);
+}
+
+function saldoBaseBaixa() {
+  if (baixaAtual) return numero(baixaAtual.saldoBaseBaixa ?? (saldoLancamento(baixaAtual) || valorTotalLancamento(baixaAtual)));
+  return numero(valor("baixaValorDevido"));
+}
+
+function valorDevidoAjustadoBaixa() {
+  const base = saldoBaseBaixa();
+  const desconto = numero(valor("baixaDesconto"));
+  const acrescimo = numero(valor("baixaJuros"));
+  return Math.max(0, Number((base + acrescimo - desconto).toFixed(2)));
+}
+
+function recalcularValorRecebidoBaixa() {
+  const devido = valorDevidoAjustadoBaixa();
+  setValor("baixaValorDevido", devido.toFixed(2));
+  setValor("baixaValorPago", devido.toFixed(2));
+  calcularPreviewCartao();
+  atualizarDiferencaRecebimento();
+}
+
+function normalizarModalidadePorForma(forma) {
+  const f = String(forma || "").toLowerCase();
+  if (f.includes("pix")) return "pix";
+  if (f.includes("boleto")) return "boleto";
+  if (f.includes("débito") || f.includes("debito")) return "debito";
+  if (f.includes("crédito") || f.includes("credito")) return "credito";
+  return "credito";
+}
+
+function bandeirasDisponiveis() {
+  const modalidadeAtual = valor("baixaModalidadeCartao");
+  const lista = taxasCartao.filter((t) => !modalidadeAtual || t.modalidade === modalidadeAtual);
+  return [...new Set(lista.map((t) => t.bandeira).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
+}
+
+function taxasFiltradas() {
+  const bandeira = valor("baixaBandeiraCartao");
+  const modalidade = valor("baixaModalidadeCartao");
+  return taxasCartao.filter((t) => t.bandeira === bandeira && t.modalidade === modalidade)
+    .sort((a, b) => Number(a.parcelas) - Number(b.parcelas));
+}
+
+async function carregarTaxasCartao() {
+  try {
+    const resp = await fetch(API_TAXAS, { cache: "no-store" });
+    const json = resp.ok ? await resp.json().catch(() => ({})) : {};
+    if (!resp.ok) throw new Error(await obterMensagemErroResposta(resp, `Erro HTTP ${resp.status}`));
+    if (json.ok === false) throw new Error(json.mensagem || json.erro || "Não foi possível confirmar o recebimento.");
+    taxasCartao = Array.isArray(json.taxas) && json.taxas.length ? json.taxas : TAXAS_CARTAO_TESTE;
+  } catch {
+    taxasCartao = TAXAS_CARTAO_TESTE;
+  }
+}
+
+async function carregarPessoasFinanceiro() {
+  try {
+    const [alunosResp, fornecedoresResp] = await Promise.all([
+      fetch(API_ALUNOS, { cache: "no-store" }).then((r) => r.json()).catch(() => ({})),
+      fetch(API_FORNECEDORES, { cache: "no-store" }).then((r) => r.json()).catch(() => ({}))
+    ]);
+    alunosFinanceiro = listaPayload(alunosResp, "alunos");
+    fornecedoresFinanceiro = listaPayload(fornecedoresResp, "fornecedores");
+  } catch {
+    alunosFinanceiro = [];
+    fornecedoresFinanceiro = [];
+  }
+  preencherListaPessoasFinanceiro();
+}
+
+function preencherListaPessoasFinanceiro() {
+  opcoesPessoasFinanceiro = [
+    ...alunosFinanceiro.map((aluno) => ({
+      tipo: "aluno",
+      id: aluno.id || aluno.alunoId || "",
+      nome: nomeAlunoFinanceiro(aluno),
+      label: `Aluno - ${nomeAlunoFinanceiro(aluno)}`
+    })),
+    ...fornecedoresFinanceiro.map((fornecedor) => ({
+      tipo: "fornecedor",
+      id: fornecedor.id || fornecedor.fornecedorId || "",
+      nome: nomeFornecedorFinanceiro(fornecedor),
+      label: `Fornecedor - ${nomeFornecedorFinanceiro(fornecedor)}`
+    }))
+  ].filter((item) => item.nome);
+
+  if (!els.listaPessoasFinanceiro) return;
+  els.listaPessoasFinanceiro.innerHTML = opcoesPessoasFinanceiro
+    .sort((a, b) => a.label.localeCompare(b.label, "pt-BR"))
+    .map((item) => `<option value="${escapeHtml(item.label)}">${escapeHtml(item.nome)}</option>`)
+    .join("");
+}
+
+function opcaoPessoaSelecionada() {
+  const digitado = valor("alunoFornecedor").trim();
+  const alvo = normalizarTexto(digitado);
+  if (!alvo) return null;
+  return opcoesPessoasFinanceiro.find((item) =>
+    normalizarTexto(item.label) === alvo ||
+    normalizarTexto(item.nome) === alvo
+  ) || null;
+}
+
+function sincronizarPessoaSelecionada() {
+  const selecionado = opcaoPessoaSelecionada();
+  if (!selecionado) return;
+  setValor("pessoaTipo", selecionado.tipo);
+  setValor("pessoaId", selecionado.id);
+}
+
+async function resolverPessoaFinanceira() {
+  const digitado = valor("alunoFornecedor").trim();
+  const selecionado = opcaoPessoaSelecionada();
+
+  if (selecionado) {
+    setValor("pessoaTipo", selecionado.tipo);
+    setValor("pessoaId", selecionado.id);
+    setValor("alunoFornecedor", selecionado.nome);
+    return selecionado;
+  }
+
+  setValor("pessoaTipo", "");
+  setValor("pessoaId", "");
+
+  if (valor("tipo") !== "pagar" || !digitado) return { tipo: "", id: "", nome: digitado };
+
+  const resp = await fetch(API_FORNECEDORES, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ nome: digitado, origem: "financeiro" })
+  });
+  const json = resp.ok ? await resp.json().catch(() => ({})) : {};
+  if (!resp.ok || json.ok === false) {
+    throw new Error(json.mensagem || json.erro || "Não foi possível cadastrar o fornecedor.");
+  }
+
+  const fornecedor = json.fornecedor || {};
+  await carregarPessoasFinanceiro();
+  setValor("pessoaTipo", "fornecedor");
+  setValor("pessoaId", fornecedor.id || "");
+  setValor("alunoFornecedor", fornecedor.nome || digitado);
+  return { tipo: "fornecedor", id: fornecedor.id || "", nome: fornecedor.nome || digitado };
+}
+
+function preencherBandeirasCartao() {
+  const select = document.getElementById("baixaBandeiraCartao");
+  if (!select) return;
+  const atual = select.value;
+  const bandeiras = bandeirasDisponiveis();
+  select.innerHTML = bandeiras.map((b) => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join("");
+  select.value = atual && bandeiras.includes(atual) ? atual : (bandeiras[0] || "");
+}
+
+function preencherParcelasCartao() {
+  const select = document.getElementById("baixaParcelasCartao");
+  if (!select) return;
+  const atual = Number(select.value || 1);
+  const lista = taxasFiltradas();
+  select.innerHTML = lista.map((t) => `<option value="${Number(t.parcelas)}">${Number(t.parcelas)}x - ${Number(t.percentual || 0).toFixed(2)}%${Number(t.taxaFixa || 0) > 0 ? ` + R$ ${Number(t.taxaFixa || 0).toFixed(2)}` : ""}</option>`).join("");
+  const existe = lista.some((t) => Number(t.parcelas) === atual);
+  select.value = existe ? String(atual) : String(lista[0]?.parcelas || 1);
+  aplicarTaxaSelecionada();
+}
+
+function taxaSelecionadaCartao() {
+  const bandeira = valor("baixaBandeiraCartao");
+  const modalidade = valor("baixaModalidadeCartao");
+  const parcelas = Number(valor("baixaParcelasCartao") || 1);
+  return taxasCartao.find((t) => t.bandeira === bandeira && t.modalidade === modalidade && Number(t.parcelas) === parcelas) || null;
+}
+
+function aplicarTaxaSelecionada() {
+  const taxa = taxaSelecionadaCartao();
+  if (taxa) {
+    setValor("baixaTaxaPercentual", Number(taxa.percentual || 0).toFixed(2));
+    setValor("baixaTaxaFixa", Number(taxa.taxaFixa || 0).toFixed(2));
+  }
+  calcularPreviewCartao();
+}
+
+function calcularDadosCartao() {
+  const bruto = numero(valor("baixaValorPago"));
+  const percentual = numero(valor("baixaTaxaPercentual"));
+  const taxaFixa = numero(valor("baixaTaxaFixa"));
+  const taxaPercentualValor = Number((bruto * percentual / 100).toFixed(2));
+  const taxaValor = Number((taxaPercentualValor + taxaFixa).toFixed(2));
+  const liquido = Number(Math.max(0, bruto - taxaValor).toFixed(2));
+  return { bruto, percentual, taxaFixa, taxaPercentualValor, taxaValor, liquido };
+}
+
+function calcularPreviewCartao() {
+  const dados = calcularDadosCartao();
+  const elBruto = document.getElementById("calcValorBruto");
+  const elTaxa = document.getElementById("calcTaxaValor");
+  const elLiquido = document.getElementById("calcValorLiquido");
+  if (elBruto) elBruto.textContent = moeda(dados.bruto);
+  if (elTaxa) elTaxa.textContent = moeda(dados.taxaValor);
+  if (elLiquido) elLiquido.textContent = moeda(dados.liquido);
+}
+
+function atualizarPainelCartao() {
+  const forma = valor("baixaFormaPagamento");
+  const ativo = formaTemTaxaOperadora(forma);
+  if (els.painelCartao) els.painelCartao.hidden = !ativo;
+  if (!ativo) return;
+  setValor("baixaModalidadeCartao", normalizarModalidadePorForma(forma));
+  preencherBandeirasCartao();
+  preencherParcelasCartao();
+  calcularPreviewCartao();
+}
+
+function abrirModalTaxas() {
+  renderizarTabelaTaxas();
+  els.modalTaxas.classList.add("ativo");
+}
+
+function fecharModalTaxas() {
+  els.modalTaxas.classList.remove("ativo");
+}
+
+function renderizarTabelaTaxas() {
+  if (!els.tabelaTaxas) return;
+  const lista = taxasCartao.length ? taxasCartao : TAXAS_CARTAO_TESTE;
+  els.tabelaTaxas.innerHTML = lista.map((taxa, i) => `<tr>
+    <td><input data-taxa-campo="bandeira" data-taxa-index="${i}" value="${escapeHtml(taxa.bandeira)}"></td>
+    <td><select data-taxa-campo="modalidade" data-taxa-index="${i}">
+      <option value="debito" ${taxa.modalidade === "debito" ? "selected" : ""}>Débito</option>
+      <option value="credito" ${taxa.modalidade === "credito" ? "selected" : ""}>Crédito</option>
+      <option value="pix" ${taxa.modalidade === "pix" ? "selected" : ""}>PIX</option>
+      <option value="boleto" ${taxa.modalidade === "boleto" ? "selected" : ""}>Boleto</option>
+    </select></td>
+    <td><input data-taxa-campo="parcelas" data-taxa-index="${i}" type="number" min="1" step="1" value="${Number(taxa.parcelas || 1)}"></td>
+    <td><input data-taxa-campo="percentual" data-taxa-index="${i}" type="number" min="0" step="0.01" value="${Number(taxa.percentual || 0).toFixed(2)}"></td>
+    <td><input data-taxa-campo="taxaFixa" data-taxa-index="${i}" type="number" min="0" step="0.01" value="${Number(taxa.taxaFixa || 0).toFixed(2)}"></td>
+    <td><input data-taxa-campo="descricao" data-taxa-index="${i}" value="${escapeHtml(taxa.descricao || "")}"></td>
+    <td><button type="button" class="btn-danger" onclick="removerTaxaCartao(${i})">Remover</button></td>
+  </tr>`).join("");
+}
+
+function coletarTaxasDaTabela() {
+  const mapa = new Map();
+  document.querySelectorAll("[data-taxa-index]").forEach((el) => {
+    const i = Number(el.dataset.taxaIndex);
+    const campo = el.dataset.taxaCampo;
+    const atual = mapa.get(i) || {};
+    atual[campo] = el.value;
+    mapa.set(i, atual);
+  });
+  return [...mapa.values()].map((t) => ({
+    bandeira: String(t.bandeira || "").trim(),
+    modalidade: String(t.modalidade || "credito").trim().toLowerCase(),
+    parcelas: Math.max(1, Number(t.parcelas || 1)),
+    percentual: numero(t.percentual),
+    taxaFixa: numero(t.taxaFixa),
+    descricao: String(t.descricao || "").trim()
+  })).filter((t) => t.bandeira && t.percentual >= 0);
+}
+
+window.removerTaxaCartao = function removerTaxaCartao(index) {
+  taxasCartao.splice(index, 1);
+  renderizarTabelaTaxas();
+};
+
+async function salvarTaxasCartaoTela() {
+  const lista = coletarTaxasDaTabela();
+  if (!lista.length) return alert("Informe ao menos uma taxa válida.");
+  try {
+    const resp = await fetch(API_TAXAS, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ taxas: lista }) });
+    const json = resp.ok ? await resp.json().catch(() => ({})) : {};
+    if (!resp.ok) throw new Error(await obterMensagemErroResposta(resp, `Erro HTTP ${resp.status}`));
+    if (json.ok === false) throw new Error(json.mensagem || json.erro || "Não foi possível confirmar o recebimento.");
+    taxasCartao = json.taxas || lista;
+    fecharModalTaxas();
+    atualizarPainelCartao();
+    alert("Taxas de recebimento salvas.");
+  } catch (erro) {
+    alert(erro.message || "Erro ao salvar taxas de recebimento.");
+  }
+}
+
+function abrirModal(lancamento = null) {
+  els.form.reset();
+  if (lancamento) {
+    els.modalTitulo.textContent = "Editar Lançamento";
+    setValor("lancamentoId", lancamento.id);
+    setValor("tipo", lancamento.tipo);
+    setValor("status", lancamento.status);
+    setValor("descricao", lancamento.descricao);
+    setValor("categoria", lancamento.categoria);
+    setValor("centroCusto", lancamento.centroCusto);
+    setValor("alunoFornecedor", lancamento.alunoFornecedor || lancamento.pessoa || lancamento.pessoaFornecedor);
+    setValor("pessoaTipo", lancamento.pessoaTipo || (lancamento.fornecedorId ? "fornecedor" : (lancamento.alunoId ? "aluno" : "")));
+    setValor("pessoaId", lancamento.pessoaId || lancamento.fornecedorId || lancamento.alunoId || "");
+    setValor("valor", lancamento.valor);
+    setValor("vencimento", lancamento.vencimento);
+    setValor("pagamento", lancamento.pagamento || lancamento.dataPagamento);
+    setValor("formaPagamento", lancamento.formaPagamento);
+    setValor("observacoes", lancamento.observacoes || lancamento.observacao);
+  } else {
+    els.modalTitulo.textContent = "Novo Lançamento";
+    setValor("lancamentoId", "");
+    setValor("tipo", "receber");
+    setValor("status", "Aberto");
+    setValor("pessoaTipo", "");
+    setValor("pessoaId", "");
+  }
+  els.modal.classList.add("ativo");
+}
+
+function fecharModal() { els.modal.classList.remove("ativo"); }
+
+function valorBrutoRecebidoLancamento(item) { return numero(item.valorBrutoRecebido ?? item.valorPago ?? item.valorRecebido ?? item.valor ?? item.valorBruto ?? 0); }
+function taxaOperadoraLancamento(item) { return numero(item.taxaOperadoraValor ?? item.taxaValor ?? 0); }
+function valorLiquidoRecebidoLancamento(item) {
+  const liquido = numero(item.valorLiquido ?? item.valorRecebidoLiquido ?? 0);
+  if (liquido > 0) return liquido;
+  const bruto = valorBrutoRecebidoLancamento(item);
+  const taxa = taxaOperadoraLancamento(item);
+  return Math.max(0, Number((bruto - taxa).toFixed(2)));
+}
+function valorPagoLancamento(item) { return numero(item.valorPago ?? item.valorRecebido ?? item.valorLiquido ?? 0); }
+function valorTotalLancamento(item) { return numero(item.valor ?? item.valorBruto ?? item.total ?? 0); }
+function saldoLancamento(item) {
+  const st = String(item.status || "").toLowerCase();
+  if (["programado", "programada", "agendado", "agendada", "previsto", "prevista"].includes(st) || item.programado === true || item.previsto === true) return 0;
+  if (item.valorRestante !== undefined && item.valorRestante !== null) return Math.max(0, numero(item.valorRestante));
+  const status = st;
+  if (["pago", "recebido"].includes(status)) return 0;
+  return Math.max(0, valorTotalLancamento(item) - valorPagoLancamento(item));
+}
+
+function abrirIndicadorFinanceiro(tipo = '', status = '', indicador = '') {
+  filtroIndicador = indicador;
+  els.busca.value = '';
+  els.filtroTipo.value = tipo;
+  els.filtroStatus.value = status;
+  carregarLancamentos().then(() => document.querySelector('.tabela-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+}
+
+function renderizarTabela() {
+  const listaExibida = filtroIndicador === 'taxas'
+    ? lancamentos.filter((item) => lancamentoPago(item) && taxaOperadoraLancamento(item) > 0)
+    : lancamentos;
+  if (!listaExibida.length) {
+    els.tabela.innerHTML = `<tr><td colspan="11">Nenhum lançamento encontrado.</td></tr>`;
+    return;
+  }
+  els.tabela.innerHTML = listaExibida.map((item) => {
+    const st = statusClasse(item.status);
+    const jaPago = lancamentoPago(item);
+    const programado = ["programado", "programada", "agendado", "agendada", "previsto", "prevista"].includes(st) || item.programado === true || item.previsto === true;
+    return `<tr>
+      <td><span class="tipo ${escapeHtml(item.tipo)}">${item.tipo === "receber" ? "Receber" : "Pagar"}</span></td>
+      <td>${escapeHtml(item.descricao)}</td>
+      <td>${escapeHtml(item.categoria || "-")}</td>
+      <td>${escapeHtml(item.alunoFornecedor || item.pessoa || item.pessoaFornecedor || "-")}</td>
+      <td>${escapeHtml(item.vencimento || "-")}</td>
+      <td>${moeda(valorTotalLancamento(item))}</td>
+      <td>${lancamentoPago(item) ? moeda(valorBrutoRecebidoLancamento(item)) : "-"}</td>
+      <td>${lancamentoPago(item) ? moeda(taxaOperadoraLancamento(item)) : "-"}</td>
+      <td><strong>${lancamentoPago(item) ? moeda(valorLiquidoRecebidoLancamento(item)) : "-"}</strong></td>
+      <td><span class="badge ${escapeHtml(st)}">${escapeHtml(item.status || "Aberto")}</span></td>
+      <td><div class="acoes">
+        <button class="btn-secondary" onclick="editarLancamento('${escapeHtml(item.id)}')">Editar</button>
+        <button class="btn-light" ${jaPago || programado ? "disabled" : ""} onclick="baixarLancamento('${escapeHtml(item.id)}')">${item.tipo === "pagar" ? "Pagar" : "Receber"}</button>
+        <button class="btn-light" ${jaPago || programado ? "disabled" : ""} onclick="alterarVencimentoLancamento('${escapeHtml(item.id)}')">Vencimento</button>
+        <button class="btn-danger" ${jaPago || programado ? "disabled" : ""} onclick="excluirLancamento('${escapeHtml(item.id)}')">Cancelar</button>
+      </div></td>
+    </tr>`;
+  }).join("");
+}
+
+async function carregarResumo() {
+  const [respResumo, respCaixa] = await Promise.all([
+    fetch(`${API}/resumo`, { cache: "no-store" }),
+    fetch("/api/caixa/atual", { cache: "no-store" }).catch(() => null)
+  ]);
+  const json = await respResumo.json();
+  if (json.ok) {
+    els.kpiReceitasPagas.textContent = moeda(json.resumo.receitasLiquidasPagas ?? json.resumo.receitasPagas);
+    els.kpiReceitasAbertas.textContent = moeda(json.resumo.receitasAbertas);
+    els.kpiDespesasAbertas.textContent = moeda(json.resumo.taxasFinanceiras ?? json.resumo.despesasAbertas);
+    els.kpiSaldoPrevisto.textContent = moeda(json.resumo.saldoLiquidoPrevisto ?? json.resumo.saldoPrevisto);
+  }
+  if (els.kpiCaixaReal && respCaixa?.ok) {
+    const caixaJson = await respCaixa.json().catch(() => ({}));
+    els.kpiCaixaReal.textContent = moeda(caixaJson?.totais?.saldoAtualLiquido ?? caixaJson?.totais?.saldoLiquido ?? caixaJson?.totais?.saldoAtual ?? 0);
+  }
+}
+
+async function carregarLancamentos() {
+  const params = new URLSearchParams();
+  if (els.busca.value) params.set("busca", els.busca.value);
+  if (els.filtroTipo.value) params.set("tipo", els.filtroTipo.value);
+  if (els.filtroStatus.value) params.set("status", els.filtroStatus.value);
+  const resp = await fetch(`${API}?${params.toString()}`, { cache: "no-store" });
+  const json = await resp.json();
+  lancamentos = json.lancamentos || [];
+  renderizarTabela();
+  await carregarResumo();
+  abrirBaixaPorUrlSeExistir();
+}
+
+async function iniciarFinanceiro() {
+  await carregarTaxasCartao();
+  await carregarPessoasFinanceiro();
+  await carregarLancamentos();
+}
+
+async function salvarLancamento(event) {
+  event.preventDefault();
+  const btn = event.submitter || els.form.querySelector('button[type="submit"]');
+  try {
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "Salvando...";
+    }
+    const id = valor("lancamentoId");
+    const pessoa = await resolverPessoaFinanceira();
+    const payload = {
+      operacaoId: `financeiro-${id}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      tipo: valor("tipo"), status: valor("status"), descricao: valor("descricao"), categoria: valor("categoria"),
+      centroCusto: valor("centroCusto"), alunoFornecedor: pessoa.nome || valor("alunoFornecedor"), pessoaTipo: pessoa.tipo || valor("pessoaTipo"),
+      pessoaId: pessoa.id || valor("pessoaId"), fornecedorId: pessoa.tipo === "fornecedor" ? pessoa.id : "",
+      alunoId: pessoa.tipo === "aluno" ? pessoa.id : "", valor: valor("valor"),
+      vencimento: valor("vencimento"), pagamento: valor("pagamento"), formaPagamento: valor("formaPagamento"),
+      observacoes: valor("observacoes")
+    };
+    const resp = await fetch(id ? `${API}/${encodeURIComponent(id)}` : API, {
+      method: id ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload)
+    });
+    const json = resp.ok ? await resp.json().catch(() => ({})) : {};
+    if (!resp.ok || json.ok === false) throw new Error(json.mensagem || json.erro || await obterMensagemErroResposta(resp, `Erro HTTP ${resp.status}`));
+    fecharModal();
+    await iniciarFinanceiro();
+  } catch (erro) {
+    alert(erro.message || "Erro ao salvar lançamento financeiro.");
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "Salvar";
+    }
+  }
+}
+
+window.editarLancamento = function editarLancamento(id) {
+  const lancamento = lancamentos.find((item) => String(item.id) === String(id));
+  if (lancamento) abrirModal(lancamento);
+};
+
+function abrirModalBaixa(lancamento) {
+  baixaAtual = {
+    ...lancamento,
+    operacaoRecebimentoId: globalThis.crypto?.randomUUID?.() || `oprec_${Date.now()}_${Math.random().toString(16).slice(2)}`
+  };
+  const total = valorTotalLancamento(lancamento);
+  const saldo = saldoLancamento(lancamento) || total;
+  baixaAtual.saldoBaseBaixa = saldo;
+  setValor("baixaLancamentoId", lancamento.id);
+  setValor("baixaMensalidadeId", lancamento.mensalidadeId || "");
+  setValor("baixaValorDevido", saldo.toFixed(2));
+  setValor("baixaValorPago", saldo.toFixed(2));
+  setValor("baixaDataPagamento", hojeISO());
+  setValor("baixaFormaPagamento", lancamento.formaPagamento || "Dinheiro");
+  setValor("baixaDesconto", "0");
+  setValor("baixaJuros", "0");
+  setValor("baixaObservacao", "");
+  els.resumoBaixa.innerHTML = `<div><strong>${escapeHtml(lancamento.descricao || "Recebimento")}</strong></div>
+    <div>Aluno/cliente: ${escapeHtml(lancamento.alunoFornecedor || lancamento.pessoa || "-")}</div>
+    <div>Vencimento: ${escapeHtml(lancamento.vencimento || "-")}</div>
+    <div>Valor original: <strong>${moeda(total)}</strong></div>
+    <div>Saldo para baixa: <strong>${moeda(saldo)}</strong></div>`;
+  atualizarPainelCartao();
+  recalcularValorRecebidoBaixa();
+  els.modalBaixa.classList.add("ativo");
+  setTimeout(() => document.getElementById("baixaValorPago")?.focus(), 80);
+}
+
+function fecharModalBaixa() {
+  els.modalBaixa.classList.remove("ativo");
+  baixaAtual = null;
+}
+
+window.baixarLancamento = function baixarLancamento(id) {
+  const lancamento = lancamentos.find((item) => String(item.id) === String(id));
+  if (!lancamento) return alert("Lançamento não encontrado na listagem atual.");
+  abrirModalBaixa(lancamento);
+};
+
+async function confirmarBaixa(event) {
+  event.preventDefault();
+  const id = valor("baixaLancamentoId");
+  const valorPago = numero(valor("baixaValorPago"));
+  const valorDevido = valorDevidoAjustadoBaixa();
+  const saldoAplicado = Math.min(valorPago, valorDevido);
+  if (!id) return alert("Lançamento não informado.");
+  if (valorPago <= 0) return alert("Informe um valor pago maior que zero.");
+  const btn = document.getElementById("btnConfirmarBaixa");
+  btn.disabled = true;
+  btn.textContent = "Confirmando...";
+  try {
+    const caixaOk = await verificarCaixaAbertoAntesDaBaixa();
+    if (!caixaOk.ok) {
+      alert(caixaOk.mensagem);
+      if (confirm("Deseja abrir a tela de Caixa agora?")) location.href = "/pages/caixa/";
+      return;
+    }
+    const dadosCartao = calcularDadosCartao();
+    const formaPagamento = valor("baixaFormaPagamento");
+    const payload = {
+      operacaoId: baixaAtual?.operacaoRecebimentoId,
+      valorPago,
+      valorEntregue: valorPago,
+      valorRecebido: valorPago,
+      valorAplicado: saldoAplicado,
+      valorBaixa: saldoAplicado,
+      valor: saldoAplicado,
+      pagamento: valor("baixaDataPagamento"),
+      dataPagamento: valor("baixaDataPagamento"),
+      formaPagamento,
+      desconto: numero(valor("baixaDesconto")),
+      juros: numero(valor("baixaJuros")),
+      acrescimo: numero(valor("baixaJuros")),
+      observacao: valor("baixaObservacao"),
+      bandeiraCartao: formaTemTaxaOperadora(formaPagamento) ? valor("baixaBandeiraCartao") : "",
+      modalidadeCartao: formaTemTaxaOperadora(formaPagamento) ? valor("baixaModalidadeCartao") : "",
+      parcelasCartao: formaTemTaxaOperadora(formaPagamento) ? Number(valor("baixaParcelasCartao") || 1) : "",
+      taxaOperadoraPercentual: formaTemTaxaOperadora(formaPagamento) ? dadosCartao.percentual : 0,
+      taxaOperadoraFixa: formaTemTaxaOperadora(formaPagamento) ? dadosCartao.taxaFixa : 0,
+      taxaOperadoraValor: formaTemTaxaOperadora(formaPagamento) ? dadosCartao.taxaValor : 0,
+      valorBrutoRecebido: valorPago,
+      valorLiquido: formaTemTaxaOperadora(formaPagamento) ? dadosCartao.liquido : valorPago
+    };
+    if (valorPago > saldoAplicado) {
+      const troco = document.getElementById("baixaDestinoTroco")?.checked;
+      payload.destinoDiferenca = troco ? "troco" : "credito";
+    }
+    const resp = await fetch(`${API}/${encodeURIComponent(id)}/baixar`, {
+      method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload)
+    });
+    const json = resp.ok ? await resp.json().catch(() => ({})) : {};
+    if (!resp.ok) throw new Error(await obterMensagemErroResposta(resp, `Erro HTTP ${resp.status}`));
+    if (json.ok === false) throw new Error(json.mensagem || json.erro || "Não foi possível confirmar o recebimento.");
+
+    const motor = json?.cobrancaAutomatica || {};
+    let mensagemMotor = "";
+    if (motor.programada) mensagemMotor = `\n\nPróxima fatura programada para ${motor.proximoVencimento || "a data escolhida"}. Ela ainda não faz parte do saldo em aberto.`;
+    else if (motor.gerada) mensagemMotor = `\n\nPróxima mensalidade gerada automaticamente: ${motor.proximoVencimento || ""}`;
+    else if (motor.aviso && motor.motivo) mensagemMotor = `\n\nAtenção na recorrência: ${motor.motivo}`;
+
+    fecharModalBaixa();
+    limparParametrosBaixaDaUrl();
+    const numeroRecibo = json?.lancamento?.recibo?.numero;
+    alert(`${baixaAtual?.tipo === "pagar" ? "Pagamento" : "Recebimento"} confirmado e registrado.${numeroRecibo ? `\nRecibo nº ${numeroRecibo}` : ""}${mensagemMotor}`);
+    await iniciarFinanceiro();
+  } catch (erro) {
+    alert(erro.message || "Erro ao confirmar pagamento.");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Confirmar pagamento";
+  }
+}
+
+window.excluirLancamento = async function excluirLancamento(id) {
+  const motivo = prompt("Motivo do cancelamento (obrigatório para auditoria):", "Cancelamento operacional");
+  if (!motivo) return;
+  const resp = await fetch(`${API}/${encodeURIComponent(id)}`, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ motivo, usuario: "financeiro" }) });
+  if (!resp.ok) return alert(await obterMensagemErroResposta(resp, "Não foi possível cancelar."));
+  await iniciarFinanceiro();
+};
+
+window.alterarVencimentoLancamento = async function alterarVencimentoLancamento(id) {
+  const atual = lancamentos.find((item) => String(item.id) === String(id));
+  if (!atual) return;
+  if (atual.tipo === "pagar") return editarLancamento(id);
+  const vencimento = prompt("Novo vencimento (AAAA-MM-DD):", atual.vencimento || hojeISO());
+  if (!vencimento || !/^\d{4}-\d{2}-\d{2}$/.test(vencimento)) return;
+  const motivo = prompt("Motivo da alteração:", "Acordo com o aluno");
+  if (!motivo) return;
+  const resp = await fetch(`${API_LEDGER}/titulos/${encodeURIComponent(id)}/vencimento`, {
+    method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ vencimento, motivo, usuario: "financeiro" })
+  });
+  if (!resp.ok) return alert(await obterMensagemErroResposta(resp, "Não foi possível alterar o vencimento."));
+  await iniciarFinanceiro();
+};
+
+function abrirConsultaFinanceira(titulo, html) {
+  document.getElementById("tituloConsultaFinanceira").textContent = titulo;
+  document.getElementById("conteudoConsultaFinanceira").innerHTML = html;
+  document.getElementById("modalConsultaFinanceira").classList.add("ativo");
+}
+
+function atualizarDiferencaRecebimento() {
+  const pago = numero(valor("baixaValorPago"));
+  const devido = numero(valor("baixaValorDevido"));
+  const painel = document.getElementById("painelDiferencaRecebimento");
+  if (!painel) return;
+  const diferenca = Number(Math.max(0, pago - devido).toFixed(2));
+  painel.classList.toggle("hidden", diferenca <= 0);
+  painel.style.display = diferenca > 0 ? "grid" : "none";
+  const texto = document.getElementById("textoDiferencaRecebimento");
+  if (texto) texto.textContent = `Diferença de ${moeda(diferenca)}: escolha troco ou crédito.`;
+  const dinheiro = normalizarTexto(valor("baixaFormaPagamento")) === "dinheiro";
+  const opcaoTroco = document.getElementById("opcaoTrocoRecebimento");
+  const radioTroco = document.getElementById("baixaDestinoTroco");
+  const radioCredito = document.getElementById("baixaDestinoCredito");
+  if (opcaoTroco) opcaoTroco.style.display = dinheiro ? "flex" : "none";
+  if (!dinheiro && radioTroco) radioTroco.checked = false;
+  if (diferenca > 0 && !radioTroco?.checked && radioCredito) radioCredito.checked = true;
+}
+
+function fecharConsultaFinanceira() { document.getElementById("modalConsultaFinanceira").classList.remove("ativo"); }
+
+async function consultarRecibos() {
+  const resp = await fetch(`${API_LEDGER}/recibos`, { cache: "no-store" });
+  const json = await resp.json().catch(() => ({}));
+  if (!resp.ok) return alert(json.erro || "Não foi possível listar recibos.");
+  const lista = Array.isArray(json) ? json : (json.recibos || json.dados || []);
+  abrirConsultaFinanceira("Recibos", `<table><thead><tr><th>Número</th><th>Data</th><th>Aluno</th><th>Valor</th><th>Situação</th><th>Ação</th></tr></thead><tbody>${lista.map((r) => `<tr><td>${escapeHtml(r.numero)}</td><td>${escapeHtml(r.data)}</td><td>${escapeHtml(r.aluno || "-")}</td><td>${moeda(r.valorPago)}</td><td>${r.cancelado ? "Estornado" : "Válido"}</td><td>${r.cancelado ? "-" : `<button class="btn-danger" type="button" onclick="estornarReciboFinanceiro('${escapeHtml(r.id)}')">Estornar</button>`}</td></tr>`).join("") || '<tr><td colspan="6">Nenhum recibo.</td></tr>'}</tbody></table>`);
+}
+
+window.estornarReciboFinanceiro = async function estornarReciboFinanceiro(id) {
+  const motivo = prompt("Motivo obrigatório do estorno:");
+  if (!motivo || motivo.trim().length < 3) return;
+  const resp = await fetch(`${API_LEDGER}/recibos/${encodeURIComponent(id)}/estornar`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ motivo, usuario: "financeiro" }) });
+  const json = await resp.json().catch(() => ({}));
+  if (!resp.ok) return alert(json.mensagem || "Não foi possível estornar. Verifique se o caixa está aberto.");
+  alert("Recibo estornado com contramovimento no caixa. O histórico foi preservado.");
+  await consultarRecibos();
+  await iniciarFinanceiro();
+};
+
+async function consultarExtratoAluno() {
+  const termo = prompt("Digite o nome ou CPF do aluno:");
+  if (!termo) return;
+  const alvo = normalizarTexto(termo);
+  const aluno = alunosFinanceiro.find((a) => normalizarTexto(`${nomeAlunoFinanceiro(a)} ${a.cpf || ""}`).includes(alvo));
+  if (!aluno) return alert("Aluno não encontrado. Digite parte do nome ou CPF cadastrado.");
+  const id = aluno.id || aluno.alunoId;
+  const resp = await fetch(`${API_LEDGER}/alunos/${encodeURIComponent(id)}/extrato`, { cache: "no-store" });
+  const json = await resp.json().catch(() => ({}));
+  if (!resp.ok) return alert(json.erro || "Não foi possível montar o extrato.");
+  const e = json.extrato || json.dados || json;
+  const titulos = e.titulos || [];
+  abrirConsultaFinanceira(`Extrato — ${nomeAlunoFinanceiro(aluno)}`, `<p><strong>Cobrado:</strong> ${moeda(e.totais?.cobrado)} &nbsp; <strong>Recebido:</strong> ${moeda(e.totais?.recebido)} &nbsp; <strong>Em aberto:</strong> ${moeda(e.totais?.aberto)} &nbsp; <strong>Vencido:</strong> ${moeda(e.totais?.vencido)}</p><table><thead><tr><th>Vencimento</th><th>Descrição</th><th>Valor</th><th>Pago</th><th>Status</th></tr></thead><tbody>${titulos.map((t) => `<tr><td>${escapeHtml(t.vencimento)}</td><td>${escapeHtml(t.descricao)}</td><td>${moeda(t.valor)}</td><td>${moeda(t.valorPago)}</td><td>${escapeHtml(t.status)}</td></tr>`).join("") || '<tr><td colspan="5">Sem movimentação.</td></tr>'}</tbody></table>`);
+}
+
+async function consultarIntegridade() {
+  const resp = await fetch(`${API_LEDGER}/integridade`, { cache: "no-store" });
+  const json = await resp.json().catch(() => ({}));
+  if (!resp.ok) return alert(json.erro || "Falha na verificação.");
+  const rel = json.relatorio || json.dados || json;
+  const falhas = rel.falhas || [];
+  abrirConsultaFinanceira("Integridade financeira", `<p><strong>${rel.ok ? "Base íntegra" : "Atenção necessária"}</strong> — ${falhas.length} ocorrência(s).</p><table><thead><tr><th>Nível</th><th>Código</th><th>Registro</th></tr></thead><tbody>${falhas.map((f) => `<tr><td>${escapeHtml(f.nivel)}</td><td>${escapeHtml(f.codigo)}</td><td>${escapeHtml(f.registroId || "-")}</td></tr>`).join("") || '<tr><td colspan="3">Nenhuma inconsistência encontrada.</td></tr>'}</tbody></table>`);
+}
+
+function abrirBaixaPorUrlSeExistir() {
+  if (baixaAutomaticaUrlProcessada) return;
+  const params = new URLSearchParams(location.search);
+  const financeiroId = params.get("financeiroId") || params.get("financeiroid") || params.get("lancamentoId") || params.get("id");
+  const mensalidadeId = params.get("mensalidadeId") || params.get("mensalidadeid");
+  if (!financeiroId && !mensalidadeId) return;
+
+  baixaAutomaticaUrlProcessada = true;
+
+  let lancamento = null;
+  if (financeiroId) lancamento = lancamentos.find((item) => String(item.id) === String(financeiroId));
+  if (!lancamento && mensalidadeId) lancamento = lancamentos.find((item) => String(item.mensalidadeId) === String(mensalidadeId));
+
+  // Remove os parâmetros logo depois de processar a chamada automática.
+  // Assim, se o operador atualizar a página, o modal não abre novamente.
+  limparParametrosBaixaDaUrl();
+
+  if (!lancamento) {
+    alert("Lançamento financeiro da matrícula não foi encontrado. Atualize a página ou confira se o financeiroId existe.");
+    return;
+  }
+
+  if (lancamentoPago(lancamento)) {
+    alert("Este lançamento já está pago. A baixa automática não será aberta novamente.");
+    return;
+  }
+
+  abrirModalBaixa(lancamento);
+}
+
+document.getElementById("btnNovoLancamento")?.addEventListener("click", () => abrirModal());
+document.getElementById("kpiAbrirCaixa")?.addEventListener("click", () => { window.location.href = "/pages/caixa/index.html"; });
+document.getElementById("kpiAbrirReceitasPagas")?.addEventListener("click", () => abrirIndicadorFinanceiro("receber", "Pago"));
+document.getElementById("kpiAbrirReceitasAbertas")?.addEventListener("click", () => abrirIndicadorFinanceiro("receber", "Aberto"));
+document.getElementById("kpiAbrirTaxas")?.addEventListener("click", () => abrirIndicadorFinanceiro("receber", "Pago", "taxas"));
+document.getElementById("kpiAbrirSaldoPrevisto")?.addEventListener("click", () => abrirIndicadorFinanceiro("", "Aberto"));
+document.getElementById("btnTaxasCartao")?.addEventListener("click", abrirModalTaxas);
+document.getElementById("btnAbrirTaxasNoRecebimento")?.addEventListener("click", abrirModalTaxas);
+document.getElementById("btnFecharTaxas")?.addEventListener("click", fecharModalTaxas);
+document.getElementById("btnCancelarTaxas")?.addEventListener("click", fecharModalTaxas);
+document.getElementById("btnAdicionarTaxa")?.addEventListener("click", () => { taxasCartao.push({ bandeira: "Nova taxa", modalidade: "credito", parcelas: 1, percentual: 0, taxaFixa: 0, descricao: "" }); renderizarTabelaTaxas(); });
+document.getElementById("btnRestaurarTaxas")?.addEventListener("click", () => { taxasCartao = TAXAS_CARTAO_TESTE.map((t) => ({ ...t })); renderizarTabelaTaxas(); });
+document.getElementById("btnSalvarTaxas")?.addEventListener("click", salvarTaxasCartaoTela);
+document.getElementById("baixaFormaPagamento")?.addEventListener("change", atualizarPainelCartao);
+document.getElementById("baixaFormaPagamento")?.addEventListener("change", atualizarDiferencaRecebimento);
+document.getElementById("baixaBandeiraCartao")?.addEventListener("change", preencherParcelasCartao);
+document.getElementById("baixaModalidadeCartao")?.addEventListener("change", preencherParcelasCartao);
+document.getElementById("baixaParcelasCartao")?.addEventListener("change", aplicarTaxaSelecionada);
+document.getElementById("baixaTaxaPercentual")?.addEventListener("input", calcularPreviewCartao);
+document.getElementById("baixaTaxaFixa")?.addEventListener("input", calcularPreviewCartao);
+document.getElementById("baixaValorPago")?.addEventListener("input", calcularPreviewCartao);
+document.getElementById("baixaValorPago")?.addEventListener("input", atualizarDiferencaRecebimento);
+document.getElementById("baixaDesconto")?.addEventListener("input", recalcularValorRecebidoBaixa);
+document.getElementById("baixaJuros")?.addEventListener("input", recalcularValorRecebidoBaixa);
+document.getElementById("btnFecharModal")?.addEventListener("click", fecharModal);
+document.getElementById("btnCancelar")?.addEventListener("click", fecharModal);
+document.getElementById("alunoFornecedor")?.addEventListener("change", sincronizarPessoaSelecionada);
+document.getElementById("alunoFornecedor")?.addEventListener("input", () => { setValor("pessoaTipo", ""); setValor("pessoaId", ""); });
+document.getElementById("btnFiltrar")?.addEventListener("click", carregarLancamentos);
+document.getElementById("btnRecibos")?.addEventListener("click", consultarRecibos);
+document.getElementById("btnExtratoAluno")?.addEventListener("click", consultarExtratoAluno);
+document.getElementById("btnIntegridade")?.addEventListener("click", consultarIntegridade);
+document.getElementById("btnFecharConsultaFinanceira")?.addEventListener("click", fecharConsultaFinanceira);
+document.getElementById("btnOkConsultaFinanceira")?.addEventListener("click", fecharConsultaFinanceira);
+document.getElementById("btnLimpar").addEventListener("click", () => { filtroIndicador = ""; els.busca.value = ""; els.filtroTipo.value = ""; els.filtroStatus.value = ""; iniciarFinanceiro(); });
+document.getElementById("btnFecharBaixa")?.addEventListener("click", fecharModalBaixa);
+document.getElementById("btnCancelarBaixa")?.addEventListener("click", fecharModalBaixa);
+els.form.addEventListener("submit", salvarLancamento);
+els.formBaixa.addEventListener("submit", confirmarBaixa);
+
+iniciarFinanceiro();

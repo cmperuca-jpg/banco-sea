@@ -1,0 +1,397 @@
+.page-actions { display: flex; justify-content: flex-end; margin-bottom: 18px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 18px; }
+.kpi-card span { display: block; color: #64748b; font-size: 13px; margin-bottom: 8px; }
+.kpi-card strong { display: block; color: #0f172a; font-size: 26px; }
+.filters-row { display: grid; grid-template-columns: 1fr 180px 180px; gap: 10px; margin-bottom: 14px; }
+.filters-row input, .filters-row select, .form-grid input, .form-grid select, .form-grid textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: 10px; padding: 11px 12px; outline: none; font-size: 14px; }
+.table-responsive { overflow-x: auto; }
+.plano-nome { display: flex; flex-direction: column; gap: 4px; }
+.plano-nome strong { color: #0f172a; }
+.plano-nome small { color: #64748b; }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag { background: #f1f5f9; color: #334155; border-radius: 999px; padding: 5px 8px; font-size: 12px; font-weight: 700; }
+.badge { padding: 5px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+.badge.ativo { background: #dcfce7; color: #166534; }
+.badge.inativo { background: #fee2e2; color: #991b1b; }
+.btn-primary, .btn-secondary, .btn-danger, .btn-icon { border: 0; border-radius: 10px; padding: 10px 14px; cursor: pointer; font-weight: 700; }
+.btn-primary { background: #22b8d2; color: white; }
+.btn-secondary { background: #e2e8f0; color: #0f172a; }
+.btn-danger { background: #dc2626; color: white; }
+.btn-icon { background: transparent; font-size: 26px; padding: 0 8px; }
+.acoes { display: flex; gap: 8px; }
+.modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+.modal-backdrop.aberto { display: flex; }
+.modal-card { background: white; width: min(900px, 100%); max-height: 92vh; overflow-y: auto; border-radius: 18px; box-shadow: 0 30px 80px rgba(15, 23, 42, 0.3); padding: 22px; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.form-grid label, .field-label { color: #334155; font-weight: 700; font-size: 13px; }
+.form-grid label input, .form-grid label select, .form-grid label textarea { margin-top: 6px; }
+.field-title { display: block; color: #e5f7fb; font-weight: 900; }
+.form-hint { display: block; margin-top: 6px; color: #64748b; font-size: 12px; font-weight: 500; }
+.modalidades-picker { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; margin-top: 8px; }
+.modalidade-option { display: flex; align-items: center; gap: 10px; min-height: 46px; border: 1px solid #9fb7c1!important; border-radius: 10px; padding: 10px 12px; background: #f8fafc!important; color: #102b35!important; font-weight: 900!important; text-shadow: none!important; }
+.modalidade-option input { width: 16px!important; height: 16px!important; min-width: 16px; margin: 0!important; accent-color: #22c7d9; }
+.modalidade-option span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #102b35!important; text-shadow: none!important; }
+.modalidade-option:has(input:checked) { background: #e6fbff!important; border-color: #22c7d9!important; box-shadow: inset 0 0 0 1px #22c7d9; }
+.modalidades-empty { border: 1px dashed #cbd5e1; border-radius: 10px; padding: 12px; color: #64748b; background: #f8fafc; }
+.full { grid-column: 1 / -1; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+@media (max-width: 900px) { .kpi-grid, .filters-row, .form-grid { grid-template-columns: 1fr; } }
+
+/* Fusion Sistema — tabela de planos ajustada à área útil */
+.planos-page .main{min-width:0!important;overflow-x:hidden!important}
+.planos-page .main>.card{min-width:0!important;overflow:hidden!important}
+.planos-page .table-responsive{width:100%!important;max-width:100%!important;overflow-x:auto!important;border-radius:8px!important}
+.planos-page .table-responsive table{width:100%!important;min-width:900px!important;table-layout:fixed!important;border-collapse:collapse!important}
+.planos-page .table-responsive th,
+.planos-page .table-responsive td{padding:7px 6px!important;font-size:11px!important;line-height:1.25!important;vertical-align:middle!important;overflow-wrap:anywhere!important}
+.planos-page .table-responsive th{white-space:nowrap!important;font-size:9px!important}
+.planos-page .table-responsive th:nth-child(1){width:25%!important}
+.planos-page .table-responsive th:nth-child(2){width:8%!important}
+.planos-page .table-responsive th:nth-child(3){width:9%!important}
+.planos-page .table-responsive th:nth-child(4){width:9%!important}
+.planos-page .table-responsive th:nth-child(5){width:15%!important}
+.planos-page .table-responsive th:nth-child(6){width:9%!important}
+.planos-page .table-responsive th:nth-child(7){width:10%!important}
+.planos-page .table-responsive th:nth-child(8){width:7%!important}
+.planos-page .table-responsive th:nth-child(9){width:8%!important}
+.planos-page .plano-nome{min-width:0!important;gap:2px!important}
+.planos-page .plano-nome strong{font-size:11px!important;white-space:normal!important;overflow-wrap:anywhere!important}
+.planos-page .plano-nome small{display:block!important;font-size:9px!important;line-height:1.2!important;white-space:normal!important;overflow-wrap:anywhere!important}
+.planos-page .table-responsive td:nth-child(2),
+.planos-page .table-responsive td:nth-child(3),
+.planos-page .table-responsive td:nth-child(4),
+.planos-page .table-responsive td:nth-child(6),
+.planos-page .table-responsive td:nth-child(7),
+.planos-page .table-responsive td:nth-child(8){white-space:nowrap!important}
+.planos-page .tags{gap:3px!important;align-items:center!important}
+.planos-page .tag{padding:3px 5px!important;font-size:9px!important;line-height:1!important;white-space:nowrap!important}
+.planos-page .badge{padding:4px 6px!important;font-size:9px!important;white-space:nowrap!important}
+.planos-page .acoes{display:flex!important;gap:4px!important;flex-wrap:nowrap!important;justify-content:flex-end!important}
+.planos-page .acoes .btn-secondary,
+.planos-page .acoes .btn-danger{min-width:0!important;min-height:28px!important;padding:5px 6px!important;border-radius:5px!important;font-size:9px!important;line-height:1!important;white-space:nowrap!important}
+@media(max-width:1180px){
+  .planos-page .table-responsive table{min-width:840px!important}
+  .planos-page .table-responsive th,.planos-page .table-responsive td{padding:6px 4px!important;font-size:10px!important}
+}
+@media(max-width:700px){
+  .planos-page .filters-row{grid-template-columns:1fr!important}
+  .planos-page .table-responsive table{min-width:820px!important}
+}
+
+/* Fusion Sistema — padrão profissional de modal (2026-07-30) */
+html:has(#modalPlano.aberto),
+body:has(#modalPlano.aberto){
+  overflow:hidden!important;
+}
+
+.planos-page #modalPlano.modal-backdrop.aberto{
+  position:fixed!important;
+  inset:0!important;
+  z-index:20050!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:clamp(10px,2vw,24px)!important;
+  overflow:hidden!important;
+  background:rgba(7,24,32,.70)!important;
+  backdrop-filter:blur(3px)!important;
+  -webkit-backdrop-filter:blur(3px)!important;
+}
+
+.planos-page #modalPlano .modal-card{
+  width:min(960px,calc(100vw - 28px))!important;
+  max-width:960px!important;
+  height:auto!important;
+  max-height:calc(100dvh - 28px)!important;
+  margin:0!important;
+  padding:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+  border:1px solid #cfdce3!important;
+  border-radius:16px!important;
+  background:#fff!important;
+  box-shadow:0 28px 90px rgba(2,12,20,.38)!important;
+}
+
+.planos-page #modalPlano .modal-header{
+  flex:0 0 auto!important;
+  min-height:62px!important;
+  margin:0!important;
+  padding:12px 18px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:16px!important;
+  border:0!important;
+  border-bottom:1px solid #2d6470!important;
+  background:#153f4b!important;
+  color:#fff!important;
+}
+
+.planos-page #modalPlano .modal-header h2{
+  margin:0!important;
+  color:#fff!important;
+  font-size:21px!important;
+  line-height:1.2!important;
+  font-weight:800!important;
+  letter-spacing:-.01em!important;
+}
+
+.planos-page #modalPlano .modal-header #btnFecharModal{
+  flex:0 0 38px!important;
+  width:38px!important;
+  min-width:38px!important;
+  height:38px!important;
+  min-height:38px!important;
+  margin:0!important;
+  padding:0!important;
+  display:grid!important;
+  place-items:center!important;
+  border:1px solid rgba(255,255,255,.28)!important;
+  border-radius:10px!important;
+  background:rgba(255,255,255,.10)!important;
+  color:#fff!important;
+  font-size:24px!important;
+  line-height:1!important;
+  cursor:pointer!important;
+}
+
+.planos-page #modalPlano .modal-header #btnFecharModal:hover{
+  background:#fff!important;
+  color:#153f4b!important;
+}
+
+.planos-page #modalPlano .form-grid{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  width:100%!important;
+  margin:0!important;
+  padding:20px 20px 0!important;
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  align-content:start!important;
+  gap:16px!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  background:#f7fafb!important;
+  color:#173343!important;
+  overscroll-behavior:contain!important;
+}
+
+.planos-page #modalPlano .form-grid>label,
+.planos-page #modalPlano .field-label{
+  min-width:0!important;
+  margin:0!important;
+  color:#2e4a5a!important;
+  font-size:12px!important;
+  line-height:1.25!important;
+  font-weight:800!important;
+}
+
+.planos-page #modalPlano .field-title{
+  display:block!important;
+  margin:0 0 7px!important;
+  color:#2e4a5a!important;
+  font-size:12px!important;
+  line-height:1.25!important;
+  font-weight:800!important;
+  text-shadow:none!important;
+}
+
+.planos-page #modalPlano .form-grid :is(input,select,textarea){
+  width:100%!important;
+  min-width:0!important;
+  min-height:42px!important;
+  margin:6px 0 0!important;
+  padding:9px 11px!important;
+  border:1px solid #b9cbd5!important;
+  border-radius:9px!important;
+  background:#fff!important;
+  color:#173343!important;
+  font-size:14px!important;
+  line-height:1.35!important;
+}
+
+.planos-page #modalPlano .form-grid textarea{
+  min-height:96px!important;
+  resize:vertical!important;
+}
+
+.planos-page #modalPlano .form-grid :is(input,select,textarea):focus{
+  outline:0!important;
+  border-color:#22b8d2!important;
+  box-shadow:0 0 0 3px rgba(34,184,210,.15)!important;
+}
+
+.planos-page #modalPlano .modalidades-picker{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:10px!important;
+  margin-top:0!important;
+}
+
+.planos-page #modalPlano .modalidade-option{
+  min-width:0!important;
+  min-height:44px!important;
+  padding:9px 11px!important;
+  border:1px solid #b9cbd5!important;
+  border-radius:9px!important;
+  background:#fff!important;
+  color:#173343!important;
+  font-size:13px!important;
+  font-weight:800!important;
+}
+
+.planos-page #modalPlano .modalidade-option:hover{
+  border-color:#71bfcc!important;
+  background:#f0fafc!important;
+}
+
+.planos-page #modalPlano .modalidade-option:has(input:checked){
+  border-color:#22b8d2!important;
+  background:#e8f9fc!important;
+  box-shadow:inset 0 0 0 1px #22b8d2!important;
+}
+
+.planos-page #modalPlano .modalidade-option input{
+  width:16px!important;
+  min-width:16px!important;
+  height:16px!important;
+  min-height:16px!important;
+  margin:0!important;
+  padding:0!important;
+}
+
+.planos-page #modalPlano .modalidade-option span{
+  min-width:0!important;
+  color:#173343!important;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+}
+
+.planos-page #modalPlano .form-hint{
+  margin-top:7px!important;
+  color:#607786!important;
+  font-size:12px!important;
+  font-weight:500!important;
+}
+
+.planos-page #modalPlano .modal-actions{
+  position:sticky!important;
+  bottom:0!important;
+  z-index:20!important;
+  width:auto!important;
+  min-height:66px!important;
+  margin:4px -20px 0!important;
+  padding:12px 20px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:9px!important;
+  border-top:1px solid #d4e0e6!important;
+  background:rgba(255,255,255,.97)!important;
+  box-shadow:0 -10px 24px rgba(21,63,75,.08)!important;
+  backdrop-filter:blur(8px)!important;
+}
+
+.planos-page #modalPlano .modal-actions button{
+  width:auto!important;
+  min-width:112px!important;
+  min-height:40px!important;
+  margin:0!important;
+  padding:9px 14px!important;
+  border-radius:9px!important;
+  font-size:13px!important;
+  line-height:1!important;
+  font-weight:800!important;
+}
+
+.planos-page #modalPlano .modal-actions .btn-secondary{
+  border:1px solid #aebfc9!important;
+  background:#fff!important;
+  color:#264555!important;
+}
+
+.planos-page #modalPlano .modal-actions .btn-primary{
+  border:1px solid #1aa9bf!important;
+  background:#22b8d2!important;
+  color:#fff!important;
+}
+
+@media(max-width:760px){
+  .planos-page #modalPlano.modal-backdrop.aberto{padding:8px!important}
+  .planos-page #modalPlano .modal-card{width:100%!important;max-height:calc(100dvh - 16px)!important;border-radius:13px!important}
+  .planos-page #modalPlano .form-grid{grid-template-columns:1fr!important;padding:14px 14px 0!important}
+  .planos-page #modalPlano .modalidades-picker{grid-template-columns:1fr!important}
+  .planos-page #modalPlano .modal-actions{margin:4px -14px 0!important;padding:10px 14px!important}
+}
+
+@media(max-width:480px){
+  .planos-page #modalPlano.modal-backdrop.aberto{padding:0!important}
+  .planos-page #modalPlano .modal-card{width:100vw!important;height:100dvh!important;max-height:100dvh!important;border-radius:0!important}
+  .planos-page #modalPlano .modal-header{min-height:56px!important;padding:9px 12px!important}
+  .planos-page #modalPlano .modal-header h2{font-size:18px!important}
+  .planos-page #modalPlano .form-grid{padding:12px 12px 0!important}
+  .planos-page #modalPlano .modal-actions{display:grid!important;grid-template-columns:1fr 1fr!important;margin:4px -12px 0!important;padding:9px 12px calc(9px + env(safe-area-inset-bottom))!important}
+  .planos-page #modalPlano .modal-actions button{width:100%!important;min-width:0!important}
+}
+
+/* Fusion Sistema — ações da tabela de planos com área de clique adequada */
+.planos-page .table-responsive table{
+  min-width:1040px!important;
+}
+
+.planos-page .table-responsive th:nth-child(1){width:22%!important}
+.planos-page .table-responsive th:nth-child(5){width:14%!important}
+.planos-page .table-responsive th:nth-child(9){width:15%!important}
+
+.planos-page .table-responsive td:nth-child(9){
+  min-width:160px!important;
+  padding-right:10px!important;
+}
+
+.planos-page .acoes{
+  width:100%!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
+  flex-wrap:nowrap!important;
+}
+
+.planos-page .acoes .btn-secondary,
+.planos-page .acoes .btn-danger{
+  flex:1 1 0!important;
+  width:auto!important;
+  min-width:70px!important;
+  min-height:38px!important;
+  padding:9px 11px!important;
+  border-radius:9px!important;
+  font-size:12px!important;
+  line-height:1.1!important;
+  font-weight:800!important;
+  white-space:nowrap!important;
+}
+
+.planos-page .acoes .btn-secondary:focus-visible,
+.planos-page .acoes .btn-danger:focus-visible{
+  outline:3px solid rgba(34,184,210,.24)!important;
+  outline-offset:2px!important;
+}
+
+@media(max-width:1180px){
+  .planos-page .table-responsive table{min-width:1000px!important}
+  .planos-page .acoes .btn-secondary,
+  .planos-page .acoes .btn-danger{
+    min-width:68px!important;
+    min-height:36px!important;
+    padding:8px 10px!important;
+    font-size:11px!important;
+  }
+}
+
+@media(max-width:700px){
+  .planos-page .table-responsive table{min-width:980px!important}
+}

@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Portal do Aluno - Fusion Sistema</title>
+  <meta name="theme-color" content="#14b8d4">
+  <link rel="manifest" href="/manifest-aluno.webmanifest">
+  <link rel="stylesheet" href="/assets/css/fusion-app.css">
+  <link rel="stylesheet" href="./style.css?v=20260730-portal-aluno-1">
+</head>
+<body class="portal-aluno-page">
+  <main class="portal">
+    <header class="portal-topbar">
+      <a class="portal-marca" id="linkMarca" href="#" aria-label="Início do portal do aluno">
+        <img src="/assets/brand/fusion-sistema-logo.svg" alt="Fusion Sistema">
+      </a>
+      <button id="sair" type="button" class="botao botao-discreto">Sair</button>
+    </header>
+
+    <section class="portal-hero" aria-labelledby="tituloPortalAluno">
+      <div class="perfil-foto-wrap">
+        <img id="fotoAluno" class="perfil-foto hidden" alt="Foto do aluno">
+        <div id="fotoFallback" class="perfil-fallback" aria-hidden="true">AL</div>
+      </div>
+
+      <div class="hero-conteudo">
+        <span class="hero-etiqueta">Portal do aluno</span>
+        <h1 id="tituloPortalAluno">Olá, aluno.</h1>
+        <p id="saudacao">Carregando seus dados...</p>
+        <div class="hero-status">
+          <span id="statusAluno" class="status-chip">Cadastro ativo</span>
+          <span id="planoAluno" class="status-chip status-chip-claro">Plano não informado</span>
+        </div>
+      </div>
+
+      <div class="hero-acoes" aria-label="Acessos rápidos do aluno">
+        <a id="linkTreino" class="botao botao-principal" href="/pages/aluno-treinos/">Meu treino</a>
+        <a id="linkAvaliacao" class="botao botao-secundario" href="/pages/aluno-avaliacao/">Avaliação física</a>
+        <a id="linkSite" class="botao botao-secundario" href="/pages/promocao/index.html" target="_blank" rel="noopener noreferrer">Site da academia</a>
+        <button id="irParaPix" class="botao botao-pix" type="button" disabled>Consultar Pix</button>
+      </div>
+    </section>
+
+    <section class="resumo-grid" aria-label="Resumo do aluno">
+      <article class="resumo-card">
+        <span>Situação financeira</span>
+        <strong id="resumoFinanceiro">Consultando...</strong>
+        <small id="resumoFinanceiroDetalhe">Aguarde a atualização.</small>
+      </article>
+      <article class="resumo-card">
+        <span>Próximo passo</span>
+        <strong id="proximoPasso">Acessar o treino</strong>
+        <small id="proximoPassoDetalhe">Veja sua prescrição atualizada.</small>
+      </article>
+      <article class="resumo-card">
+        <span>Acesso emergencial</span>
+        <strong id="resumoAcesso">Consultando...</strong>
+        <small id="resumoAcessoDetalhe">Disponibilidade mensal.</small>
+      </article>
+    </section>
+
+    <section class="card card-status" id="cardStatus" aria-live="polite">
+      <div class="loading"><span class="loading-dot"></span>Consultando sua situação financeira...</div>
+    </section>
+
+    <section class="card card-pix hidden" id="cardPix" aria-labelledby="tituloPix">
+      <div class="card-head">
+        <div>
+          <span class="card-kicker">Pagamento seguro</span>
+          <h2 id="tituloPix">Pagamento via Pix</h2>
+          <p>Copie o código, efetue o pagamento e envie o comprovante para solicitar a liberação temporária.</p>
+        </div>
+        <div class="pix-valor-box">
+          <span>Valor</span>
+          <strong id="pixValor">R$ 0,00</strong>
+        </div>
+      </div>
+
+      <div class="pix-grid">
+        <div class="pix-codigo-area">
+          <label for="pixCodigo">Pix Copia e Cola / chave Pix</label>
+          <textarea id="pixCodigo" readonly></textarea>
+          <button id="copiarPix" class="botao botao-principal botao-largo" type="button">Copiar código Pix</button>
+        </div>
+
+        <div class="comprovante-area">
+          <label for="comprovante">Comprovante</label>
+          <div class="upload-box">
+            <input id="comprovante" type="file" accept="image/png,image/jpeg,image/webp">
+            <span>PNG, JPG ou WEBP. Tamanho máximo de 8 MB.</span>
+          </div>
+          <img id="preview" class="preview hidden" alt="Prévia do comprovante">
+        </div>
+      </div>
+
+      <div class="aviso">
+        O envio do comprovante utiliza a tentativa mensal e pode liberar o acesso temporário antes da conferência da recepção.
+      </div>
+
+      <button id="enviar" class="botao botao-pix botao-largo" type="button">Enviar comprovante e solicitar acesso</button>
+      <div id="mensagem" class="mensagem" role="status" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script src="/assets/js/fusion-aluno-config.js?v=20260730-1"></script>
+  <script src="./index.js?v=20260730-portal-aluno-1"></script>
+</body>
+</html>

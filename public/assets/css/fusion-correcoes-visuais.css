@@ -1,0 +1,301 @@
+/* Fusion Sistema 2.8.0 - correcoes de contraste, modais e responsividade */
+:root{
+  --fusion-fix-sidebar:215px;
+  --fusion-fix-bg:#06171e;
+  --fusion-fix-panel:#0a2a34;
+  --fusion-fix-panel-2:#0d3541;
+  --fusion-fix-border:#2a5965;
+  --fusion-fix-text:#ffffff;
+  --fusion-fix-muted:#c9dce1;
+  --fusion-fix-cyan:#28b8ca;
+}
+
+/* Contraste em cartoes e permissoes do painel administrativo */
+body.fusion-com-sidebar .check-permissao,
+body.fusion-com-sidebar .permissoes label,
+body.fusion-com-sidebar .permission-item,
+body.fusion-com-sidebar [class*="permissao"] label{
+  background:var(--fusion-fix-panel-2)!important;
+  border-color:var(--fusion-fix-border)!important;
+  color:var(--fusion-fix-text)!important;
+  opacity:1!important;
+}
+body.fusion-com-sidebar .check-permissao *,
+body.fusion-com-sidebar .permissoes label *,
+body.fusion-com-sidebar .permission-item *{
+  color:inherit!important;
+  opacity:1!important;
+}
+body.fusion-com-sidebar input[type="checkbox"],
+body.fusion-com-sidebar input[type="radio"]{
+  accent-color:var(--fusion-fix-cyan)!important;
+  opacity:1!important;
+}
+
+/* Todo modal fica acima do menu e centralizado somente na area util */
+body.fusion-com-sidebar :is(.modal-backdrop,.modal-overlay,.popup-operacional){
+  position:fixed!important;
+  top:0!important;
+  right:0!important;
+  bottom:0!important;
+  left:var(--fusion-fix-sidebar)!important;
+  width:auto!important;
+  max-width:none!important;
+  z-index:3000!important;
+  padding:16px!important;
+  overflow:auto!important;
+  overscroll-behavior:contain;
+}
+body.fusion-com-sidebar :is(.modal-backdrop,.modal-overlay,.popup-operacional) :is(.modal,.modal-card,.popup-operacional-card){
+  width:min(760px,100%)!important;
+  max-width:100%!important;
+  max-height:calc(100dvh - 32px)!important;
+  margin:auto!important;
+  overflow:auto!important;
+  transform:none!important;
+}
+body.fusion-com-sidebar .modal-large{width:min(980px,100%)!important}
+body.fusion-com-sidebar :is(.modal-header,.modal-head){
+  position:sticky!important;
+  top:0!important;
+  z-index:3!important;
+  background:var(--fusion-fix-panel-2)!important;
+  color:#fff!important;
+}
+body.fusion-com-sidebar :is(.modal-header,.modal-head) :is(h2,h3){
+  color:#fff!important;
+  margin-right:12px!important;
+}
+
+/* Botao fechar: remove caracteres corrompidos e cria um X consistente */
+body.fusion-com-sidebar :is(#btnFechar,#btnFecharModal,#btnFecharBaixa,#btnFecharTaxas,.btn-icon)[aria-label="Fechar"],
+body.fusion-com-sidebar :is(#btnFechar,#btnFecharModal,#btnFecharBaixa,#btnFecharTaxas,.modal-header>.btn-icon,.modal-head>button){
+  flex:0 0 32px!important;
+  width:32px!important;
+  min-width:32px!important;
+  max-width:32px!important;
+  height:32px!important;
+  min-height:32px!important;
+  padding:0!important;
+  border:1px solid #527985!important;
+  border-radius:2px!important;
+  background:#0b2731!important;
+  color:transparent!important;
+  font-size:0!important;
+  box-shadow:none!important;
+  overflow:hidden!important;
+}
+body.fusion-com-sidebar :is(#btnFechar,#btnFecharModal,#btnFecharBaixa,#btnFecharTaxas,.modal-header>.btn-icon,.modal-head>button)::before{
+  content:"\00d7"!important;
+  display:grid!important;
+  place-items:center!important;
+  width:100%!important;
+  height:100%!important;
+  color:#e9f6f8!important;
+  font:700 20px/1 Arial,sans-serif!important;
+}
+
+/* Formularios compactos e sem corte de conteudo */
+body.fusion-com-sidebar :is(.modal,.modal-card) :is(input,select,textarea){
+  min-width:0!important;
+  max-width:100%!important;
+  color:#fff!important;
+  background:#071d25!important;
+  border-color:#527985!important;
+  opacity:1!important;
+}
+body.fusion-com-sidebar :is(.modal,.modal-card) :is(input,textarea)::placeholder{
+  color:#b8cdd2!important;
+  opacity:1!important;
+}
+body.fusion-com-sidebar :is(.modal,.modal-card) label{
+  color:#edf7f9!important;
+  opacity:1!important;
+}
+body.fusion-com-sidebar :is(.modal-actions,.modal-footer) :is(.btn-secondary,.btn-light,#btnCancelar){
+  background:#f2f7f8!important;
+  border:1px solid #c5d9de!important;
+  color:#102630!important;
+  opacity:1!important;
+}
+body.fusion-com-sidebar :is(.modal-actions,.modal-footer) :is(.btn-primary,[type="submit"]){
+  background:var(--fusion-fix-cyan)!important;
+  border:1px solid #43c7d6!important;
+  color:#fff!important;
+  opacity:1!important;
+}
+body.fusion-com-sidebar :is(.grid-2,.grid-3,.form-grid,.modal-grid){min-width:0!important}
+
+/* Chat: texto escuro e legivel sobre as superficies claras */
+body.fusion-com-sidebar .chat-admin :is(.conversas,.janela,.mensagens){color:#102630!important}
+body.fusion-com-sidebar .chat-admin .conversa-item{
+  background:#f7fbfc!important;
+  color:#102630!important;
+  border-color:#d2e2e6!important;
+}
+body.fusion-com-sidebar .chat-admin .conversa-item.ativa{background:#d9f5f8!important}
+body.fusion-com-sidebar .chat-admin .conversa-item :is(strong,span,.conversa-meta){color:#183b46!important;opacity:1!important}
+body.fusion-com-sidebar .chat-admin .msg{
+  background:#fff!important;
+  color:#132f38!important;
+  border-color:#aacbd3!important;
+  opacity:1!important;
+}
+body.fusion-com-sidebar .chat-admin .msg.usuario{background:#d7fae4!important;color:#123c2a!important}
+body.fusion-com-sidebar .chat-admin .msg :is(small,strong,span,p){color:inherit!important;opacity:1!important}
+
+/* Tabelas e paineis nunca ficam sob a barra lateral */
+body.fusion-com-sidebar :is(.table-wrap,.tabela-wrap,.painel,.financeiro-page,.chat-admin){
+  min-width:0!important;
+  max-width:100%!important;
+}
+body.fusion-com-sidebar :is(.table-wrap,.tabela-wrap){overflow-x:auto!important;-webkit-overflow-scrolling:touch}
+
+/* Matricula publica: contrato e documentos mantem contraste alto */
+.page .termos,
+.page .assinatura-wrap,
+.page .doc-box{
+  background:#f7fafb!important;
+  border-color:#b9d0d6!important;
+  color:#142f38!important;
+}
+.page .termos label,
+.page .doc-box label,
+.page .doc-box small{
+  color:#142f38!important;
+  opacity:1!important;
+}
+.page .termos input{accent-color:var(--fusion-fix-cyan)!important;opacity:1!important}
+
+/* Se o tema escuro estiver ativo, os blocos publicos tambem ficam harmonizados */
+body[style*="background"] .page .termos,
+body.fusion-premium .page .termos{
+  background:var(--fusion-fix-panel-2)!important;
+  color:#fff!important;
+}
+body.fusion-premium .page .termos label{color:#fff!important}
+
+@media(max-width:900px){
+  :root{--fusion-fix-sidebar:0px}
+  body.fusion-com-sidebar :is(.modal-backdrop,.modal-overlay,.popup-operacional){
+    left:0!important;
+    padding:8px!important;
+  }
+  body.fusion-com-sidebar :is(.modal-backdrop,.modal-overlay,.popup-operacional) :is(.modal,.modal-card,.popup-operacional-card){
+    width:100%!important;
+    max-height:calc(100dvh - 16px)!important;
+  }
+  body.fusion-com-sidebar :is(.modal,.modal-card) :is(.grid-2,.grid-3,.form-grid,.modal-grid){
+    grid-template-columns:1fr!important;
+  }
+}
+
+@media(max-width:480px){
+  body.fusion-com-sidebar :is(.modal,.modal-card){font-size:11px!important}
+  body.fusion-com-sidebar :is(.modal-actions,.modal-footer){display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important}
+  body.fusion-com-sidebar :is(.modal-actions,.modal-footer) button{width:100%!important;min-width:0!important}
+}
+
+/* Menu principal enxuto: marca em duas linhas e única saída do sistema. */
+body.fusion-com-sidebar .sidebar .fusion-brand{
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:10px!important;
+  min-height:76px!important;
+  padding:14px 12px!important;
+  white-space:normal!important;
+}
+body.fusion-com-sidebar .fusion-brand-texto{
+  display:flex!important;
+  flex-direction:column!important;
+  min-width:0!important;
+}
+body.fusion-com-sidebar .fusion-brand-texto strong{
+  display:block!important;
+  font-size:20px!important;
+  line-height:1.05!important;
+  white-space:nowrap!important;
+}
+body.fusion-com-sidebar .fusion-brand-texto small{
+  display:block!important;
+  margin-top:5px!important;
+  font-size:11px!important;
+  line-height:1.2!important;
+  white-space:nowrap!important;
+}
+body.fusion-com-sidebar .fusion-menu-sair{
+  flex:0 0 auto!important;
+  min-height:30px!important;
+  padding:6px 9px!important;
+  background:transparent!important;
+  border:1px solid #58737b!important;
+  color:#eaf5f7!important;
+  box-shadow:none!important;
+}
+body.fusion-com-sidebar .fusion-sidebar-ferramentas{
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  padding:8px 12px 12px!important;
+  border-bottom:1px solid #24444d!important;
+}
+body.fusion-com-sidebar .fusion-catraca-controle{
+  display:grid!important;
+  grid-template-columns:1fr auto!important;
+  align-items:center!important;
+  gap:6px!important;
+  flex:1 1 auto!important;
+  min-width:0!important;
+  padding:6px 7px!important;
+  border:1px solid #315963!important;
+  background:#092630!important;
+}
+body.fusion-com-sidebar .fusion-catraca-status{
+  min-width:0!important;
+  color:#eaf7f8!important;
+  font-size:10px!important;
+  line-height:1.15!important;
+}
+body.fusion-com-sidebar .fusion-catraca-toggle{
+  min-height:28px!important;
+  padding:5px 8px!important;
+  font-size:10px!important;
+  background:var(--fusion-fix-cyan)!important;
+  color:#fff!important;
+}
+body.fusion-com-sidebar .fusion-sidebar-notificacoes{flex:0 0 auto!important;position:relative!important}
+body.fusion-com-sidebar .fusion-sidebar-notificacoes .fusion-notificacoes-panel{
+  left:0!important;
+  right:auto!important;
+  top:42px!important;
+  width:min(360px,calc(100vw - 24px))!important;
+  z-index:5000!important;
+}
+body.fusion-com-sidebar :is(.topbar,.fusion-topbar){display:none!important}
+
+/* Páginas especiais, como reconhecimento facial, também respeitam a sidebar. */
+body.fusion-com-sidebar>.sidebar.fusion-sidebar{
+  position:fixed!important;
+  left:0!important;
+  top:0!important;
+  bottom:0!important;
+  width:270px!important;
+  max-width:270px!important;
+  overflow-y:auto!important;
+}
+body.fusion-com-sidebar>main:not(.fusion-main){
+  width:calc(100% - 270px)!important;
+  max-width:calc(100% - 270px)!important;
+  margin:0 0 0 270px!important;
+  padding:24px!important;
+}
+@media(max-width:900px){
+  body.fusion-com-sidebar>main:not(.fusion-main){
+    width:100%!important;
+    max-width:100%!important;
+    margin:0!important;
+    padding:12px!important;
+  }
+}

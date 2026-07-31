@@ -1,0 +1,1851 @@
+const API_ALUNOS = "/api/alunos";
+const API_PROFESSORES = "/api/professores";
+const API_FINANCEIRO = "/api/financeiro";
+const API_MATRICULAS_INTEGRAR = "/api/matriculas/integrar";
+const API_MATRICULAS = "/api/matriculas";
+let matriculasAlunoAtual = [];
+const API_PLANOS_CANDIDATAS = ["/api/planos", "/api/financeiro/planos", "/api/cadastros/planos"];
+
+let alunos = [];
+let professoresCadastrados = [];
+let planosCadastrados = [];
+let pagina = 1;
+const porPagina = 10;
+let fotoBase64Atual = "";
+let salvando = false;
+
+const $ = (sel) => document.querySelector(sel);
+
+function dataHojeISO() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+
+function dataParaCampo(valor) {
+  if (window.FusionDate && typeof window.FusionDate.toBR === "function") return window.FusionDate.toBR(valor || "");
+  const s = String(valor || "").slice(0, 10);
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : s;
+}
+
+function dataParaISO(valor) {
+  if (window.FusionDate && typeof window.FusionDate.toISO === "function") return window.FusionDate.toISO(valor || "");
+  const s = String(valor || "").trim();
+  const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`;
+  const n = s.replace(/\D/g, "");
+  if (n.length !== 8) return "";
+  return `${n.slice(4, 8)}-${n.slice(2, 4)}-${n.slice(0, 2)}`;
+}
+
+function calcularIdade(valor) {
+  const iso = dataParaISO(valor);
+  if (!iso) return null;
+  const nascimento = new Date(`${iso}T00:00:00`);
+  const hoje = new Date();
+  if (Number.isNaN(nascimento.getTime()) || nascimento > hoje) return null;
+  let idade = hoje.getFullYear() - nascimento.getFullYear();
+  const mes = hoje.getMonth() - nascimento.getMonth();
+  if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) idade -= 1;
+  return idade >= 0 ? idade : null;
+}
+
+function atualizarIdadeAluno() {
+  const el = $("#idadeAlunoResumo");
+  if (!el) return;
+  const idade = calcularIdade($("#data_nascimento")?.value || "");
+  el.textContent = idade === null ? "Idade: informe o nascimento" : `Idade: ${idade} ano(s)`;
+}
+
+function normalizarTexto(valor) {
+  return String(valor ?? "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+function somenteNumeros(valor) {
+  return String(valor ?? "").replace(/\D/g, "");
+}
+
+function cpfValido(valor) {
+  const cpf = somenteNumeros(valor);
+  if (!cpf) return true;
+  if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+
+  const calcularDigito = (base) => {
+    let soma = 0;
+    for (let i = 0; i < base.length; i += 1) {
+      soma += Number(base[i]) * (base.length + 1 - i);
+    }
+    const resto = (soma * 10) % 11;
+    return resto === 10 ? 0 : resto;
+  };
+
+  return calcularDigito(cpf.slice(0, 9)) === Number(cpf[9]) &&
+    calcularDigito(cpf.slice(0, 10)) === Number(cpf[10]);
+}
+
+function extrairLista(payload) {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload.alunos)) return payload.alunos;
+  if (Array.isArray(payload.data)) return payload.data;
+  if (Array.isArray(payload.dados)) return payload.dados;
+  if (Array.isArray(payload.itens)) return payload.itens;
+  if (Array.isArray(payload.registros)) return payload.registros;
+  return [];
+}
+
+function planoNome(plano) {
+  return String(
+    plano?.nome ??
+    plano?.descricao ??
+    plano?.titulo ??
+    plano?.plano ??
+    plano?.nomePlano ??
+    ""
+  ).trim();
+}
+
+function planoValor(plano) {
+  return plano?.valor ?? plano?.preco ?? plano?.mensalidade ?? plano?.valorMensal ?? "";
+}
+
+function planoId(plano) {
+  return String(plano?.id ?? plano?.codigo ?? plano?.planoId ?? planoNome(plano)).trim();
+}
+
+function planoStatus(plano) {
+  return String(plano?.status ?? plano?.situacao ?? "ativo").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+function extrairListaPlanos(payload) {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload.planos)) return payload.planos;
+  if (Array.isArray(payload.data)) return payload.data;
+  if (Array.isArray(payload.dados)) return payload.dados;
+  if (Array.isArray(payload.itens)) return payload.itens;
+  if (Array.isArray(payload.registros)) return payload.registros;
+  if (Array.isArray(payload.resultado)) return payload.resultado;
+  if (payload && typeof payload === "object" && planoNome(payload)) return [payload];
+  return [];
+}
+
+async function carregarPlanos(valorAtual = "") {
+  const select = $("#plano");
+  if (select) {
+    select.innerHTML = '<option value="">Carregando planos...</option>';
+  }
+
+  let ultimoErro = "";
+
+  for (const url of API_PLANOS_CANDIDATAS) {
+    try {
+      const resp = await fetch(url, { cache: "no-store" });
+      const payload = await safeJson(resp);
+
+      if (!resp.ok) {
+        ultimoErro = payload.erro || payload.mensagem || `HTTP ${resp.status}`;
+        continue;
+      }
+
+      const lista = extrairListaPlanos(payload)
+        .filter((plano) => planoNome(plano))
+        .filter((plano) => !["inativo", "cancelado", "excluido", "excluído"].includes(planoStatus(plano)));
+
+      if (lista.length) {
+        planosCadastrados = lista;
+        preencherSelectPlanos(valorAtual);
+        return true;
+      }
+
+      ultimoErro = "API respondeu sem lista de planos";
+    } catch (erro) {
+      ultimoErro = erro.message;
+    }
+  }
+
+  planosCadastrados = [];
+  if (select) {
+    select.innerHTML = '<option value="">Nenhum plano cadastrado encontrado</option>';
+  }
+
+  mostrarAlerta(`Planos não carregados. Teste no navegador: http://localhost:3000/api/planos. Detalhe: ${ultimoErro}`, "erro");
+  return false;
+}
+
+function preencherSelectPlanos(valorAtual = "") {
+  const select = $("#plano");
+  if (!select) return;
+
+  const atual = valorAtual || select.value || "";
+  const planos = [...planosCadastrados].sort((a, b) => planoNome(a).localeCompare(planoNome(b), "pt-BR"));
+
+  select.innerHTML = '<option value="">Selecione um plano</option>' + planos.map((plano) => {
+    const nome = planoNome(plano);
+    const valor = planoValor(plano);
+    const label = valor !== "" && valor != null
+      ? `${nome} - R$ ${formatarMoeda(valor)}`
+      : nome;
+
+    return `<option value="${escapeAttr(planoId(plano))}" data-nome="${escapeAttr(nome)}">${escapeHtml(label)}</option>`;
+  }).join("");
+
+  if (atual) {
+    let existe = Array.from(select.options).some((opt) => opt.value === atual);
+    if (!existe) {
+      const planoPorNome = planos.find((p) => planoNome(p) === atual);
+      if (planoPorNome) { select.value = planoId(planoPorNome); existe = true; }
+    }
+    if (!existe) {
+      const opt = document.createElement("option");
+      opt.value = atual;
+      opt.textContent = `${atual} (não localizado nos planos atuais)`;
+      select.appendChild(opt);
+    }
+    if (!select.value) select.value = atual;
+  }
+}
+
+function formatarMoeda(valor) {
+  const numero = Number(String(valor).replace(",", "."));
+  if (!Number.isFinite(numero)) return valor;
+  return numero.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function parseMoeda(valor) {
+  if (typeof valor === "number") return Number.isFinite(valor) ? valor : 0;
+  const texto = String(valor ?? "").trim();
+  if (!texto) return 0;
+  const normalizado = texto.replace(/[^0-9,.-]/g, "").replace(/\.(?=\d{3}(\D|$))/g, "").replace(",", ".");
+  const numero = Number(normalizado);
+  return Number.isFinite(numero) ? numero : 0;
+}
+
+function diaVencimentoValido(valor) {
+  const texto = String(valor ?? "").trim();
+  if (!/^\d{1,2}$/.test(texto)) return null;
+  const dia = Number(texto);
+  return Number.isInteger(dia) && dia >= 1 && dia <= 28 ? dia : null;
+}
+
+function planoSelecionado() {
+  const id = $("#plano")?.value || "";
+  if (!id) return null;
+  return planosCadastrados.find((plano) => String(planoId(plano)) === String(id) || planoNome(plano) === id) || null;
+}
+
+function valorTaxaMatriculaPlano(plano = {}) {
+  return Math.max(0, parseMoeda(
+    plano.taxaMatricula ??
+    plano.valorMatricula ??
+    plano.valorTaxaMatricula ??
+    plano.taxa_matricula ??
+    plano.valor_matricula ??
+    plano.adesao ??
+    plano.taxaAdesao ??
+    0
+  ));
+}
+
+function atualizarPainelComercialMatricula() {
+  const plano = planoSelecionado();
+  const valorMensal = plano ? parseMoeda(planoValor(plano)) : 0;
+  const taxaConfiguradaPlano = plano ? valorTaxaMatriculaPlano(plano) : 0;
+  const cobrar = $("#cobrar_taxa_matricula")?.value !== "nao";
+  const taxaInput = $("#valor_taxa_matricula");
+  const descontoInput = $("#desconto_matricula");
+
+  const taxaAtual = Math.max(0, parseMoeda(taxaInput?.value || 0));
+  const taxaFoiEditada = taxaInput?.dataset.editado === "1";
+
+  if (taxaInput && cobrar && (!taxaFoiEditada || taxaAtual <= 0)) {
+    taxaInput.value = formatarMoeda(taxaConfiguradaPlano);
+    taxaInput.dataset.inicializado = "1";
+  }
+
+  if (taxaInput && !cobrar) {
+    taxaInput.value = "0,00";
+  }
+
+  const taxaInformada = Math.max(0, parseMoeda(taxaInput?.value || taxaConfiguradaPlano));
+  const desconto = Math.max(0, parseMoeda(descontoInput?.value || 0));
+  const taxaCobrada = cobrar ? (taxaInformada > 0 ? taxaInformada : taxaConfiguradaPlano) : 0;
+  const total = Math.max(0, valorMensal + taxaCobrada - desconto);
+
+  const mensalidadePreview = $("#valor_mensal_preview");
+  const totalPreview = $("#total_matricula_preview");
+  if (mensalidadePreview) mensalidadePreview.value = `R$ ${formatarMoeda(valorMensal)}`;
+  if (totalPreview) totalPreview.value = `R$ ${formatarMoeda(total)}`;
+  if (taxaInput) taxaInput.disabled = !cobrar;
+
+  return {
+    planoOpcional: !plano,
+    valorMensal,
+    valorPlano: valorMensal,
+    taxaPlano: taxaConfiguradaPlano,
+    cobrarTaxaMatricula: cobrar,
+    valorTaxaMatricula: taxaCobrada,
+    valorMatricula: taxaCobrada,
+    descontoMatricula: desconto,
+    valorTotalInicial: total
+  };
+}
+
+function opcoesComerciaisMatricula() {
+  const painel = atualizarPainelComercialMatricula();
+  return {
+    planoOpcional: painel.planoOpcional,
+    cobrarTaxaMatricula: painel.cobrarTaxaMatricula,
+    valorTaxaMatricula: painel.valorTaxaMatricula,
+    valorMatricula: painel.valorMatricula,
+    valorPlano: painel.valorPlano,
+    valorMensal: painel.valorMensal,
+    descontoMatricula: painel.descontoMatricula,
+    valorTotalInicial: painel.valorTotalInicial,
+    decisaoComercialEm: new Date().toISOString()
+  };
+}
+
+function alunoId(aluno) { return aluno.id ?? aluno._id ?? aluno.codigo ?? ""; }
+function alunoNome(aluno) { return aluno.nome ?? aluno.nomeCompleto ?? aluno.aluno ?? "Sem nome"; }
+function alunoFoto(aluno) { return aluno.foto_base64 ?? aluno.foto ?? aluno.fotoUrl ?? aluno.foto_url ?? aluno.avatar ?? aluno.imagem ?? ""; }
+function alunoIniciais(aluno) {
+  return alunoNome(aluno).split(/\s+/).filter(Boolean).slice(0, 2).map(parte => parte[0]).join("").toUpperCase() || "AL";
+}
+function alunoFotoListaHtml(aluno) {
+  const foto = alunoFoto(aluno);
+  if (foto) return `<img class="aluno-lista-foto" src="${escapeAttr(foto)}" alt="Foto de ${escapeAttr(alunoNome(aluno))}">`;
+  return `<span class="aluno-lista-foto aluno-lista-foto-fallback" aria-hidden="true">${escapeHtml(alunoIniciais(aluno))}</span>`;
+}
+function alunoCpf(aluno) { return aluno.cpf ?? aluno.documento ?? ""; }
+function senhaAcessoAluno(aluno = {}) { return String(aluno.senhaAluno ?? aluno.senhaAcesso ?? aluno.senhaPortal ?? aluno.portalSenha ?? aluno.senha ?? ""); }
+function alunoTelefone(aluno) { return aluno.telefone ?? aluno.celular ?? aluno.whatsapp ?? ""; }
+function alunoEmail(aluno) { return aluno.email ?? ""; }
+function alunoPlano(aluno) { return aluno.plano ?? aluno.nomePlano ?? aluno.modalidade ?? aluno.tipoPlano ?? ""; }
+function alunoPlanoId(aluno) { return aluno.planoId ?? aluno.plano_id ?? aluno.idPlano ?? ""; }
+function alunoStatus(aluno) {
+  const statusMatricula = normalizarTexto(aluno?.statusMatricula || aluno?.matriculaStatus || "");
+  const statusCadastro = normalizarTexto(aluno?.status || aluno?.situacao || "");
+
+  if (["ativa", "ativo", "regular"].includes(statusMatricula)) return "ativo";
+
+  if (["pendente", "pre-matriculado", "pre matriculado", "pre_matriculado"].includes(statusCadastro)) {
+    return "pre-matriculado";
+  }
+
+  if (["pendente", "pre-matriculado", "pre matriculado", "pre_matriculado"].includes(statusMatricula)) {
+    return "pre-matriculado";
+  }
+
+  if (["cancelada", "cancelado", "encerrada", "encerrado", "inativa", "inativo"].includes(statusMatricula)) {
+    return "inativo";
+  }
+
+  return statusCadastro || "ativo";
+}
+
+
+function resumoComercialMensagem(resultado = {}, painel = null) {
+  const dados = painel || atualizarPainelComercialMatricula();
+  const planoNomeMsg = $("#plano")?.selectedOptions?.[0]?.textContent?.replace(/\s+-\s+R\$.*$/, "") || "Sem plano";
+  const mensalidade = Number(dados.valorMensal || dados.valorPlano || 0);
+  const taxa = Number(dados.valorMatricula || dados.valorTaxaMatricula || 0);
+  const desconto = Number(dados.descontoMatricula || 0);
+  const total = Number(dados.valorTotalInicial ?? Math.max(0, mensalidade + taxa - desconto));
+
+  return [
+    "Aluno cadastrado e matrícula criada com sucesso.",
+    `Matrícula: ${resultado?.matricula?.numero || resultado?.matricula?.id || "-"}`,
+    `Plano: ${planoNomeMsg || "Sem plano"}`,
+    `Mensalidade: R$ ${formatarMoeda(mensalidade)}`,
+    `Taxa de matrícula: R$ ${formatarMoeda(taxa)}`,
+    `Desconto: R$ ${formatarMoeda(desconto)}`,
+    `Total inicial: R$ ${formatarMoeda(total)}`,
+    "",
+    total > 0
+      ? "Deseja abrir o financeiro para receber agora?"
+      : "Não há valor a receber. A matrícula pode ficar ativa sem baixa."
+  ].join("\n");
+}
+
+function mostrarAlerta(msg, tipo = "info") {
+  const el = $("#alertaAlunos");
+  el.textContent = msg;
+  el.className = `alunos-alert ${tipo}`;
+  el.classList.remove("hidden");
+  setTimeout(() => el.classList.add("hidden"), 9000);
+}
+
+
+function professorIdRegistro(p = {}) {
+  return String(p.id || p._id || p.professorId || p.professor_id || "").trim();
+}
+
+function professorNomeRegistro(p = {}) {
+  return String(p.nome || p.professorNome || p.name || p.professor || "Professor").trim();
+}
+
+function preencherSelectProfessores(selecionadoId = "", selecionadoNome = "") {
+  const select = $("#professor_responsavel");
+  if (!select) return;
+
+  const idAlvo = String(selecionadoId || "").trim();
+  const nomeAlvo = String(selecionadoNome || "").trim();
+
+  const opcoes = ['<option value="">Sem professor vinculado</option>'];
+
+  professoresCadastrados
+    .slice()
+    .sort((a, b) => professorNomeRegistro(a).localeCompare(professorNomeRegistro(b), "pt-BR"))
+    .forEach((p) => {
+      const id = professorIdRegistro(p);
+      const nome = professorNomeRegistro(p);
+      if (!id) return;
+      opcoes.push(`<option value="${escapeAttr(id)}" data-nome="${escapeAttr(nome)}">${escapeHtml(nome)}</option>`);
+    });
+
+  if (nomeAlvo && !professoresCadastrados.some(p =>
+      professorIdRegistro(p) === idAlvo ||
+      normalizarTexto(professorNomeRegistro(p)) === normalizarTexto(nomeAlvo))) {
+    opcoes.push(`<option value="${escapeAttr(idAlvo || nomeAlvo)}" data-nome="${escapeAttr(nomeAlvo)}">${escapeHtml(nomeAlvo)} (cadastro anterior)</option>`);
+  }
+
+  select.innerHTML = opcoes.join("");
+
+  if (idAlvo && [...select.options].some(o => o.value === idAlvo)) {
+    select.value = idAlvo;
+  } else if (nomeAlvo) {
+    const porNome = [...select.options].find(o =>
+      normalizarTexto(o.dataset.nome || o.textContent) === normalizarTexto(nomeAlvo));
+    select.value = porNome?.value || "";
+  } else {
+    select.value = "";
+  }
+
+  const opt = select.selectedOptions?.[0];
+  const hidden = $("#professorId");
+  if (hidden) hidden.value = select.value || "";
+  select.dataset.professorNome = opt?.dataset?.nome || "";
+}
+
+async function carregarProfessores(selecionadoId = "", selecionadoNome = "") {
+  try {
+    const resp = await fetch(API_PROFESSORES, { cache: "no-store" });
+    const payload = await safeJson(resp);
+    if (!resp.ok || payload.ok === false) {
+      throw new Error(payload.erro || payload.mensagem || `Erro HTTP ${resp.status}`);
+    }
+    professoresCadastrados = extrairLista(payload);
+  } catch (erro) {
+    professoresCadastrados = [];
+    console.warn("Não foi possível carregar professores:", erro);
+  }
+
+  preencherSelectProfessores(selecionadoId, selecionadoNome);
+}
+
+function sincronizarProfessorSelecionado() {
+  const select = $("#professor_responsavel");
+  const hidden = $("#professorId");
+  if (!select) return;
+
+  const opt = select.selectedOptions?.[0];
+  const nome = opt?.dataset?.nome || "";
+  select.dataset.professorNome = nome;
+  if (hidden) hidden.value = select.value || "";
+}
+
+async function carregarAlunos() {
+  $("#tabelaAlunos").innerHTML = `<tr><td colspan="6">Carregando alunos...</td></tr>`;
+
+  try {
+    const resp = await fetch(API_ALUNOS, { cache: "no-store" });
+    const payload = await safeJson(resp);
+
+    if (!resp.ok) {
+      throw new Error(payload.erro || payload.mensagem || `Erro HTTP ${resp.status}`);
+    }
+
+    alunos = extrairLista(payload);
+    pagina = 1;
+    limparMenu();
+    preencherFiltroPlanos();
+    atualizarKpis();
+    renderizarTabela();
+  } catch (erro) {
+    $("#tabelaAlunos").innerHTML = `<tr><td colspan="6">Erro ao carregar alunos: ${escapeHtml(erro.message)}</td></tr>`;
+    mostrarAlerta(erro.message, "erro");
+  }
+}
+
+function limparMenu() {
+  document.querySelectorAll(".fusion-menu a").forEach(a => {
+    a.classList.toggle("active", a.dataset.module === "alunos");
+    if (a.dataset.module !== "alunos") a.removeAttribute("aria-current");
+  });
+}
+
+function alunosFiltrados() {
+  const termo = normalizarTexto($("#buscaAluno").value);
+  const termoNumeros = somenteNumeros($("#buscaAluno").value);
+  const status = $("#filtroStatus").value;
+  const plano = $("#filtroPlano").value;
+
+  return alunos.filter(aluno => {
+    const texto = normalizarTexto([
+      alunoNome(aluno),
+      alunoCpf(aluno),
+      alunoTelefone(aluno),
+      alunoEmail(aluno),
+      alunoPlano(aluno)
+    ].join(" "));
+
+    return (!termo || texto.includes(termo) || (termoNumeros && somenteNumeros(alunoCpf(aluno)).includes(termoNumeros))) &&
+      (!status || alunoStatus(aluno) === status) &&
+      (!plano || String(alunoPlano(aluno)) === plano);
+  });
+}
+
+function renderizarTabela() {
+  const lista = alunosFiltrados();
+  const totalPaginas = 1;
+  pagina = 1;
+
+  const itens = lista;
+
+  $("#contadorRegistros").textContent = `${lista.length} registro(s)`;
+  $("#paginaAtual").textContent = `Página ${pagina} de ${totalPaginas}`;
+  const btnAnterior = $("#btnAnterior");
+  const btnProxima = $("#btnProxima");
+  if (btnAnterior) btnAnterior.hidden = true;
+  if (btnProxima) btnProxima.hidden = true;
+  $("#paginaAtual").textContent = `Mostrando todos os ${lista.length} registro(s)`;
+
+  renderizarCardsMobileAlunos(itens, lista.length);
+
+  if (!itens.length) {
+    $("#tabelaAlunos").innerHTML = `<tr><td colspan="6">Nenhum aluno encontrado.</td></tr>`;
+    return;
+  }
+
+  $("#tabelaAlunos").innerHTML = itens.map(a => {
+    const id = alunoId(a);
+    const st = alunoStatus(a);
+
+    return `<tr>
+      <td>
+        <div class="aluno-lista-identidade">
+          ${alunoFotoListaHtml(a)}
+          <div class="aluno-lista-texto"><strong>${escapeHtml(alunoNome(a))}</strong><small>${escapeHtml(alunoEmail(a))}</small></div>
+        </div>
+      </td>
+      <td>${escapeHtml(formatarCpfVisual(alunoCpf(a)))}</td>
+      <td>${escapeHtml(formatarTelefoneVisual(alunoTelefone(a)))}</td>
+      <td>${escapeHtml(alunoPlano(a))}</td>
+      <td>${statusAlunoHtml(id, st)}</td>
+      <td class="text-right">
+        <div class="aluno-actions-inline">
+          <button class="btn-row" type="button" onclick="abrirProntuarioAluno('${escapeAttr(id)}')">Abrir</button>
+          <button class="btn-row" type="button" onclick="abrirEdicao('${escapeAttr(id)}')">Editar</button>
+          ${botaoStatusAluno(id, st)}
+          <button class="btn-row danger" type="button" onclick="excluirAluno('${escapeAttr(id)}')">Excluir</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+
+function alunoEstaInativoOperacional(status) {
+  return ["inativo", "cancelado", "encerrado", "desligado"].includes(String(status || "").toLowerCase());
+}
+
+function alunoEstaPreMatriculado(status) {
+  return ["pre-matriculado", "pre matriculado", "pre_matriculado", "pendente"].includes(normalizarTexto(status));
+}
+
+function statusAlunoHtml(id, status) {
+  const st = String(status || "").trim();
+
+  if (alunoEstaPreMatriculado(st)) {
+    return `<button class="badge badge-status-action status-pre-matriculado" type="button" title="Matrícula aguardando pagamento. Clique para regularizar." onclick="regularizarPreMatricula('${escapeAttr(id)}')">Regularizar</button>`;
+  }
+
+  return `<span class="badge status-${escapeHtml(st)}">${escapeHtml(st)}</span>`;
+}
+
+function botaoStatusAluno(id, status) {
+  if (alunoEstaPreMatriculado(status)) {
+    return `<button class="btn-row regularizar" type="button" onclick="regularizarPreMatricula('${escapeAttr(id)}')">Regularizar</button>`;
+  }
+  if (alunoEstaInativoOperacional(status)) {
+    return `<button class="btn-row success" type="button" onclick="reativarAluno('${escapeAttr(id)}')">Reativar matrícula</button>`;
+  }
+  return `<button class="btn-row warning" type="button" onclick="cancelarAluno('${escapeAttr(id)}')">Cancelar</button>`;
+}
+
+function botaoStatusAlunoMobile(id, status) {
+  if (alunoEstaPreMatriculado(status)) {
+    return `<button type="button" class="regularizar" onclick="regularizarPreMatricula('${escapeAttr(id)}')">Regularizar</button>`;
+  }
+  if (alunoEstaInativoOperacional(status)) {
+    return `<button type="button" class="success" onclick="reativarAluno('${escapeAttr(id)}')">Reativar matrícula</button>`;
+  }
+  return `<button type="button" class="warning" onclick="cancelarAluno('${escapeAttr(id)}')">Cancelar</button>`;
+}
+
+function renderizarCardsMobileAlunos(itens = [], total = 0) {
+  const box = $("#alunosMobileCards");
+  if (!box) return;
+  if (!itens.length) {
+    box.innerHTML = `<div class="aluno-mobile-empty">Nenhum aluno encontrado.</div>`;
+    return;
+  }
+  box.innerHTML = itens.map(a => {
+    const id = alunoId(a);
+    const st = alunoStatus(a);
+    return `<article class="aluno-mobile-card status-${escapeHtml(st)}">
+      <div class="aluno-mobile-head">
+        <div class="aluno-mobile-identidade">
+          ${alunoFotoListaHtml(a)}
+          <div>
+            <strong>${escapeHtml(alunoNome(a))}</strong>
+            <small>${escapeHtml(alunoEmail(a) || formatarCpfVisual(alunoCpf(a)) || '-')}</small>
+          </div>
+        </div>
+        ${statusAlunoHtml(id, st)}
+      </div>
+      <div class="aluno-mobile-info">
+        <div><span>Plano</span><b>${escapeHtml(alunoPlano(a) || '-')}</b></div>
+        <div><span>Telefone</span><b>${escapeHtml(formatarTelefoneVisual(alunoTelefone(a)) || '-')}</b></div>
+      </div>
+      <div class="aluno-mobile-actions">
+        <button type="button" onclick="abrirProntuarioAluno('${escapeAttr(id)}')">Abrir</button>
+        <button type="button" onclick="abrirEdicao('${escapeAttr(id)}')">Editar</button>
+        ${botaoStatusAlunoMobile(id, st)}
+        <button type="button" class="danger" onclick="excluirAluno('${escapeAttr(id)}')">Excluir</button>
+      </div>
+    </article>`;
+  }).join("");
+}
+
+window.abrirProntuarioAluno = function(id) {
+  if (!id) return mostrarAlerta("ID do aluno não encontrado.", "erro");
+  location.href = `/pages/alunos/prontuario.html?id=${encodeURIComponent(id)}`;
+};
+
+window.cancelarAluno = async function(id) {
+  if (!id) return mostrarAlerta("ID do aluno não encontrado.", "erro");
+
+  const a = alunos.find(x => String(alunoId(x)) === String(id));
+  const nome = a ? alunoNome(a) : "este aluno";
+
+  if (!confirm(`Confirma cancelar ${nome}? As cobranças abertas serão canceladas e o histórico pago será preservado.`)) return;
+
+  try {
+    const resp = await fetch(`${API_ALUNOS}/${encodeURIComponent(id)}/desligar`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        usuario: "operador",
+        motivo: "Cancelamento rápido pelo cadastro de alunos."
+      })
+    });
+    const payload = await safeJson(resp);
+
+    if (!resp.ok || payload.ok === false) {
+      throw new Error(payload.erro || payload.mensagem || `Erro HTTP ${resp.status}`);
+    }
+
+    registrarHistoricoLocal(id, "cancelamento", `Aluno cancelado: ${nome}`);
+    mostrarAlerta(payload.mensagem || "Aluno cancelado com sucesso.", "sucesso");
+    await carregarAlunos();
+  } catch (erro) {
+    mostrarAlerta(erro.message, "erro");
+  }
+};
+
+function atualizarKpis() {
+  $("#kpiTotal").textContent = alunos.length;
+  $("#kpiAtivos").textContent = alunos.filter(a => alunoStatus(a) === "ativo").length;
+  $("#kpiPendentes").textContent = alunos.filter(a => ["pendente", "pre-matriculado"].includes(alunoStatus(a))).length;
+  $("#kpiInativos").textContent = alunos.filter(a => ["inativo", "cancelado"].includes(alunoStatus(a))).length;
+}
+
+function preencherFiltroPlanos() {
+  const select = $("#filtroPlano");
+  const atual = select.value;
+  const planos = [...new Set(alunos.map(alunoPlano).filter(Boolean))].sort();
+
+  select.innerHTML = `<option value="">Todos</option>` + planos
+    .map(plano => `<option value="${escapeAttr(plano)}">${escapeHtml(plano)}</option>`)
+    .join("");
+
+  select.value = atual;
+}
+
+async function abrirNovoAluno() {
+  $("#formAluno").reset();
+  const taxaLivre = $("#valor_taxa_matricula"); if (taxaLivre) { delete taxaLivre.dataset.inicializado; delete taxaLivre.dataset.editado; taxaLivre.value = "0,00"; }
+  $("#alunoId").value = "";
+  $("#status").value = "inativo";
+  if ($("#data_matricula")) $("#data_matricula").value = dataParaCampo(dataHojeISO());
+  if ($("#dia_vencimento_mensal")) $("#dia_vencimento_mensal").value = "";
+  fotoBase64Atual = "";
+  atualizarPreviewFoto("");
+  renderizarHistorico([]);
+  renderizarMatriculasAluno([]);
+  trocarTab("cadastro");
+  abrirModal("Novo aluno");
+  atualizarIdadeAluno();
+  atualizarModoCadastroAluno();
+  atualizarPainelComercialMatricula();
+}
+
+function abrirModal(t) {
+  $("#modalTitulo").textContent = t;
+  document.body.classList.add("modal-aluno-open");
+  $("#modalAluno").classList.remove("hidden");
+  setTimeout(() => $("#nome").focus(), 50);
+  if (typeof atualizarWizardAlunoMobile === "function") atualizarWizardAlunoMobile();
+}
+
+function fecharModal() {
+  document.body.classList.remove("modal-aluno-open");
+  $("#modalAluno").classList.add("hidden");
+  $("#formAluno").reset();
+  const taxaLivre = $("#valor_taxa_matricula"); if (taxaLivre) { delete taxaLivre.dataset.inicializado; delete taxaLivre.dataset.editado; taxaLivre.value = "0,00"; }
+  $("#alunoId").value = "";
+  preencherSenhaAluno("");
+  fotoBase64Atual = "";
+  atualizarPreviewFoto("");
+  setSalvarLoading(false);
+  atualizarModoCadastroAluno();
+}
+
+function preencherSenhaAluno(valor = "") {
+  ["senhaAluno", "confirmarSenhaAluno"].forEach(id => {
+    const campo = $(`#${id}`);
+    if (!campo) return;
+    campo.value = valor;
+    campo.dataset.editado = "";
+  });
+}
+
+window.abrirEdicao = async function(id) {
+  const a = alunos.find(x => String(alunoId(x)) === String(id));
+  if (!a) return mostrarAlerta("Aluno não encontrado.", "erro");
+
+  preencherFormulario(a);
+  renderizarHistorico(obterHistorico(id));
+  renderizarMatriculasAluno([]);
+  trocarTab("cadastro");
+  abrirModal("Editar aluno");
+  atualizarModoCadastroAluno();
+  atualizarPainelComercialMatricula();
+  atualizarMatriculasAlunoAtual();
+};
+
+function preencherFormulario(a) {
+  $("#alunoId").value = alunoId(a);
+  $("#nome").value = alunoNome(a);
+  $("#cpf").value = formatarCpfVisual(alunoCpf(a));
+  $("#rg").value = a.rg ?? "";
+  $("#data_nascimento").value = dataParaCampo(a.data_nascimento ?? a.dataNascimento ?? "");
+  atualizarIdadeAluno();
+  $("#sexo").value = a.sexo ?? "";
+  $("#telefone").value = formatarTelefoneVisual(alunoTelefone(a));
+  $("#whatsapp").value = formatarTelefoneVisual(a.whatsapp ?? "");
+  $("#email").value = alunoEmail(a);
+  preencherSenhaAluno(senhaAcessoAluno(a));
+  preencherSelectProfessores(
+    a.professorId || a.professor_id || a.professorResponsavelId || a.professor_responsavel_id || "",
+    a.professor_responsavel || a.professorNome || a.professor_responsavel_nome || ""
+  );
+  preencherSelectPlanos(alunoPlanoId(a) || alunoPlano(a));
+  if ($("#data_matricula")) $("#data_matricula").value = dataParaCampo((a.data_matricula ?? "").slice(0, 10) || dataHojeISO());
+  if ($("#dia_vencimento_mensal")) $("#dia_vencimento_mensal").value = a.diaVencimento ?? a.dia_vencimento ?? "";
+  $("#status").value = alunoStatus(a);
+  $("#responsavel").value = a.responsavel ?? "";
+  $("#contato_emergencia").value = a.contato_emergencia ?? a.contatoEmergencia ?? "";
+  $("#cep").value = a.cep ?? "";
+  $("#cidade").value = a.cidade ?? "";
+  $("#estado").value = a.estado ?? "";
+  $("#endereco").value = a.endereco ?? "";
+  $("#objetivo").value = a.objetivo ?? "";
+  $("#observacoes").value = a.observacoes ?? a.observacao ?? "";
+  $("#tipo_sanguineo").value = a.tipo_sanguineo ?? "";
+  $("#peso").value = a.peso ?? "";
+  $("#altura").value = a.altura ?? "";
+  $("#alergias").value = a.alergias ?? "";
+  $("#restricoes_medicas").value = a.restricoes_medicas ?? "";
+  $("#medicamentos").value = a.medicamentos ?? "";
+  $("#lesoes").value = a.lesoes ?? "";
+  fotoBase64Atual = a.foto_base64 ?? a.foto ?? "";
+  atualizarPreviewFoto(fotoBase64Atual);
+}
+
+
+function extrairLancamentosFinanceiro(payload) {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.lancamentos)) return payload.lancamentos;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.dados)) return payload.dados;
+  if (Array.isArray(payload?.itens)) return payload.itens;
+  if (Array.isArray(payload?.registros)) return payload.registros;
+  return [];
+}
+
+function statusFinanceiroAberto(item = {}) {
+  const st = normalizarTexto(item.status || item.situacao || "aberto");
+  return !["pago", "recebido", "quitado", "baixado", "cancelado", "estornado"].includes(st);
+}
+
+function pareceCobrancaRegularizacao(item = {}) {
+  const alvo = normalizarTexto([
+    item.descricao,
+    item.categoria,
+    item.origem,
+    item.recorrencia,
+    item.tipoCobranca,
+    item.observacao,
+    item.observacoes
+  ].join(" "));
+
+  return alvo.includes("matricula") ||
+    alvo.includes("matrícula") ||
+    alvo.includes("pre-matricula") ||
+    alvo.includes("pré-matrícula") ||
+    alvo.includes("entrada") ||
+    alvo.includes("adesao") ||
+    alvo.includes("adesão") ||
+    alvo.includes("reativacao") ||
+    alvo.includes("reativação") ||
+    item.ativarMatriculaAoReceber === true;
+}
+
+function idsFinanceirosDoAluno(aluno = {}) {
+  return [
+    aluno.financeiroInicialId,
+    aluno.financeiroId,
+    aluno.lancamentoFinanceiroId,
+    aluno.lancamentoId,
+    aluno.matriculaFinanceiroId,
+    aluno.recebimentoId
+  ].filter(Boolean).map(v => String(v));
+}
+
+function idsMensalidadeDoAluno(aluno = {}) {
+  return [
+    aluno.mensalidadeInicialId,
+    aluno.mensalidadeId,
+    aluno.mensalidadePendenteId
+  ].filter(Boolean).map(v => String(v));
+}
+
+async function localizarCobrancaRegularizacao(aluno = {}) {
+  const idsFinanceiros = idsFinanceirosDoAluno(aluno);
+  if (idsFinanceiros.length) return { financeiroId: idsFinanceiros[0] };
+
+  const idsMensalidades = idsMensalidadeDoAluno(aluno);
+  if (idsMensalidades.length) return { mensalidadeId: idsMensalidades[0] };
+
+  const nome = alunoNome(aluno);
+  const id = alunoId(aluno);
+  const busca = encodeURIComponent(nome || id);
+  const resp = await fetch(`${API_FINANCEIRO}?busca=${busca}`, { cache: "no-store" });
+  const payload = await safeJson(resp);
+
+  if (!resp.ok) {
+    throw new Error(payload.erro || payload.mensagem || `Erro HTTP ${resp.status}`);
+  }
+
+  const lista = extrairLancamentosFinanceiro(payload)
+    .filter(item => normalizarTexto(item.tipo || "receber") === "receber")
+    .filter(statusFinanceiroAberto)
+    .filter(item => {
+      const mesmoId = id && String(item.alunoId || item.aluno_id || "") === String(id);
+      const mesmoNome = nome && normalizarTexto([item.aluno, item.pessoa, item.alunoFornecedor, item.pessoaFornecedor].join(" ")).includes(normalizarTexto(nome));
+      return mesmoId || mesmoNome;
+    })
+    .sort((a, b) => {
+      const prioridadeA = pareceCobrancaRegularizacao(a) ? 1 : 0;
+      const prioridadeB = pareceCobrancaRegularizacao(b) ? 1 : 0;
+      if (prioridadeA !== prioridadeB) return prioridadeB - prioridadeA;
+      return String(a.vencimento || "").localeCompare(String(b.vencimento || ""));
+    });
+
+  const pendencia = lista[0];
+  if (!pendencia) return null;
+
+  return {
+    financeiroId: pendencia.id || pendencia.financeiroId || pendencia.lancamentoFinanceiroId || "",
+    mensalidadeId: pendencia.mensalidadeId || pendencia.mensalidade_id || "",
+    alunoId: id
+  };
+}
+
+window.regularizarPreMatricula = async function(id) {
+  if (!id) return mostrarAlerta("ID do aluno não encontrado.", "erro");
+
+  const aluno = alunos.find(x => String(alunoId(x)) === String(id));
+  if (!aluno) return mostrarAlerta("Aluno não encontrado.", "erro");
+
+  try {
+    mostrarAlerta(`Localizando cobrança pendente de ${alunoNome(aluno)}...`, "info");
+    const pendencia = await localizarCobrancaRegularizacao(aluno);
+
+    if (!pendencia?.financeiroId && !pendencia?.mensalidadeId) {
+      mostrarAlerta("Nenhuma cobrança pendente encontrada para regularizar. Abra a matrícula do aluno e confira o lançamento financeiro.", "erro");
+      return;
+    }
+
+    const params = new URLSearchParams();
+    if (pendencia.financeiroId) params.set("financeiroId", pendencia.financeiroId);
+    if (pendencia.mensalidadeId) params.set("mensalidadeId", pendencia.mensalidadeId);
+    params.set("alunoId", id);
+    params.set("receberAgora", "1");
+    params.set("origem", "regularizacao_pre_matricula");
+
+    location.href = `/pages/financeiro/index.html?${params.toString()}`;
+  } catch (erro) {
+    mostrarAlerta(erro.message || "Erro ao localizar pendência financeira.", "erro");
+  }
+};
+
+window.reativarAluno = async function(id) {
+  if (!id) return mostrarAlerta("ID do aluno nao encontrado.", "erro");
+  return window.abrirMatriculaAluno(id, { origem: "reativacao" });
+};
+
+window.excluirAluno = async function(id) {
+  if (!id) return mostrarAlerta("ID do aluno não encontrado.", "erro");
+
+  const a = alunos.find(x => String(alunoId(x)) === String(id));
+  const nome = a ? alunoNome(a) : "este aluno";
+
+  if (!confirm(`Confirma excluir definitivamente ${nome}? Para apenas desativar, use o botão Cancelar.`)) return;
+
+  try {
+    const resp = await fetch(`${API_ALUNOS}/${encodeURIComponent(id)}`, { method: "DELETE" });
+    const payload = await safeJson(resp);
+
+    if (!resp.ok || payload.ok === false) {
+      throw new Error(payload.erro || payload.mensagem || `Erro HTTP ${resp.status}`);
+    }
+
+    registrarHistoricoLocal(id, "exclusao", `Aluno excluído: ${nome}`);
+    mostrarAlerta(payload.mensagem || "Aluno excluído com sucesso.", "sucesso");
+    await carregarAlunos();
+  } catch (erro) {
+    mostrarAlerta(erro.message, "erro");
+  }
+};
+
+
+function resumoFinanceiroMatricula(resultado) {
+  const matricula = resultado?.matricula || {};
+  const mensalidade = resultado?.mensalidadeGerada || resultado?.mensalidadeInicial || {};
+  const financeiro = resultado?.financeiroInicial || resultado?.financeiro || {};
+  const recebimento = resultado?.recebimentoInicial || resultado?.recebimento || {};
+  const plano = resultado?.plano || {};
+
+  const valor = Number(matricula.valorMensal ?? mensalidade.valorMensal ?? plano.valorMensal ?? plano.valor ?? 0) || 0;
+  const taxa = Number(matricula.taxaMatricula ?? matricula.valorMatricula ?? mensalidade.taxaMatricula ?? plano.taxaMatricula ?? plano.valorMatricula ?? 0) || 0;
+  const desconto = Number(matricula.descontoMatricula ?? mensalidade.descontoMatricula ?? 0) || 0;
+  const total = Number(financeiro.valor ?? recebimento.valor ?? mensalidade.valor ?? mensalidade.total ?? matricula.valorTotalInicial ?? Math.max(0, valor + taxa - desconto)) || 0;
+
+  return { matricula, mensalidade, financeiro, recebimento, valor, taxa, desconto, total };
+}
+
+async function integrarMatriculaAposCadastro(aluno, dadosFormulario) {
+  const idAluno = alunoId(aluno);
+  const planoSelecionadoId = dadosFormulario.planoId || dadosFormulario.plano;
+
+  if (!idAluno || !planoSelecionadoId) return null;
+
+  const resp = await fetch(API_MATRICULAS_INTEGRAR, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      alunoId: idAluno,
+      planoId: planoSelecionadoId,
+      dataMatricula: dadosFormulario.data_matricula || dataHojeISO(),
+      diaVencimento: dadosFormulario.diaVencimento,
+      gerarMensalidade: true,
+      usuario: "operador",
+      ...opcoesComerciaisMatricula()
+    })
+  });
+
+  const payload = await safeJson(resp);
+  if (!resp.ok || payload.ok === false) {
+    throw new Error(payload.erro || payload.mensagem || `Erro HTTP ${resp.status}`);
+  }
+  return payload;
+}
+
+async function atualizarDiaVencimentoDaMatricula(alunoIdAtual, diaVencimento) {
+  if (!alunoIdAtual || !diaVencimento) return null;
+  const lista = await carregarMatriculasDoAluno(alunoIdAtual);
+  const matricula = lista.find((item) => ["ativa", "ativo", "pendente", "trancada"].includes(normalizarTexto(item?.status))) || lista[0];
+  const id = matriculaId(matricula);
+  if (!id) return null;
+
+  const resp = await fetch(`${API_MATRICULAS}/${encodeURIComponent(id)}/vencimento`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ diaVencimento, usuario: "operador" })
+  });
+  const payload = await safeJson(resp);
+  if (!resp.ok || payload.ok === false) {
+    throw new Error(payload.erro || payload.mensagem || "Erro ao salvar o dia de vencimento da matrícula.");
+  }
+  return payload;
+}
+
+function abrirRecebimentoMatricula(resultado) {
+  const { matricula, mensalidade, financeiro, recebimento } = resumoFinanceiroMatricula(resultado);
+  const params = new URLSearchParams();
+
+  const financeiroId =
+    financeiro.id ||
+    resultado?.financeiroId ||
+    matricula.financeiroInicialId ||
+    mensalidade.lancamentoFinanceiroId ||
+    recebimento.lancamentoFinanceiroId ||
+    "";
+
+  const mensalidadeId =
+    mensalidade.id ||
+    resultado?.mensalidadeId ||
+    matricula.mensalidadeInicialId ||
+    recebimento.mensalidadeId ||
+    "";
+
+  if (financeiroId) params.set("financeiroId", financeiroId);
+  if (mensalidadeId) params.set("mensalidadeId", mensalidadeId);
+  if (matricula.id) params.set("matriculaId", matricula.id);
+  if (matricula.alunoId) params.set("alunoId", matricula.alunoId);
+  params.set("receberAgora", "1");
+  params.set("origem", "matricula");
+
+  location.href = `/pages/financeiro/index.html?${params.toString()}`;
+}
+
+function confirmarRecebimentoAgora(resultado) {
+  const { matricula, valor, taxa, desconto, total } = resumoFinanceiroMatricula(resultado);
+  const texto = [
+    "Aluno cadastrado e matrícula criada com sucesso.",
+    `Matrícula: ${matricula.numero || "-"}`,
+    `Plano: ${matricula.plano || "-"}`,
+    `Mensalidade: R$ ${formatarMoeda(valor)}`,
+    `Taxa de matrícula: R$ ${formatarMoeda(taxa)}`,
+    `Desconto: R$ ${formatarMoeda(desconto || 0)}`,
+    `Total inicial: R$ ${formatarMoeda(total)}`,
+    "",
+    "Deseja abrir o financeiro para receber agora?"
+  ].join("\n");
+  return confirm(texto);
+}
+
+async function salvarAluno(ev) {
+  ev.preventDefault();
+  if (salvando) return;
+
+  const id = $("#alunoId").value;
+  const dados = coletarDadosFormulario();
+  const erro = validarAluno(dados);
+
+  if (erro) return mostrarAlerta(erro, "erro");
+
+  try {
+    setSalvarLoading(true);
+
+    const resp = await fetch(id ? `${API_ALUNOS}/${encodeURIComponent(id)}` : API_ALUNOS, {
+      method: id ? "PUT" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(dados)
+    });
+
+    const payload = await safeJson(resp);
+
+    if (!resp.ok || payload.ok === false) {
+      throw new Error(payload.erro || payload.mensagem || `Erro HTTP ${resp.status}`);
+    }
+
+    const salvo = payload.aluno || payload;
+    const idSalvo = alunoId(salvo) || id;
+    registrarHistoricoLocal(idSalvo, id ? "edicao" : "cadastro", id ? "Cadastro do aluno atualizado" : "Aluno cadastrado no sistema");
+
+    fecharModal();
+    await carregarAlunos();
+
+    if (id) {
+      mostrarAlerta("Dados do aluno atualizados com sucesso. Nenhuma matricula ou cobranca foi alterada.", "sucesso");
+      return;
+    }
+
+    if (confirm("Aluno cadastrado com sucesso. Deseja abrir a matricula agora para escolher plano, turma, modalidade e pagamento?")) {
+      window.abrirMatriculaAluno(idSalvo);
+      return;
+    }
+
+    mostrarAlerta("Aluno cadastrado com sucesso. Use Nova matricula ou Reativar matricula quando for vincular plano, turma, modalidade e pagamento.", "sucesso");
+  } catch (erro) {
+    mostrarAlerta(erro.message, "erro");
+  } finally {
+    setSalvarLoading(false);
+  }
+}
+
+function coletarDadosFormulario() {
+  const ids = [
+    "nome", "rg", "data_nascimento", "sexo", "email",
+    "responsavel", "contato_emergencia",
+    "cep", "cidade", "estado", "endereco", "objetivo", "observacoes",
+    "tipo_sanguineo", "peso", "altura", "alergias", "restricoes_medicas",
+    "medicamentos", "lesoes"
+  ];
+
+  const dados = {
+    cpf: somenteNumeros($("#cpf").value),
+    telefone: somenteNumeros($("#telefone").value),
+    whatsapp: somenteNumeros($("#whatsapp").value),
+    foto_base64: fotoBase64Atual || ""
+  };
+
+  const senhaEl = $("#senhaAluno");
+  const senha = String(senhaEl?.value || "").trim();
+  const senhaEditada = !$("#alunoId").value || senhaEl?.dataset.editado === "true" || $("#confirmarSenhaAluno")?.dataset.editado === "true";
+  if (senha && senhaEditada) {
+    dados.senhaAluno = senha;
+    dados.senhaAcesso = senha;
+    dados.senhaPortal = senha;
+    dados.portalSenha = senha;
+  }
+
+  ids.forEach(id => dados[id] = $(`#${id}`).value.trim());
+
+  const professorSelect = $("#professor_responsavel");
+  const professorOption = professorSelect?.selectedOptions?.[0];
+  const professorId = String(professorSelect?.value || "").trim();
+  const professorNome = String(professorOption?.dataset?.nome || "").trim();
+
+  dados.professorId = professorId;
+  dados.professor_responsavel = professorNome;
+  dados.professorNome = professorNome;
+  dados.professorResponsavelId = professorId;
+
+  dados.data_nascimento = dataParaISO(dados.data_nascimento);
+  if (!dados.data_nascimento) delete dados.data_nascimento;
+
+  dados.estado = (dados.estado || "").toUpperCase();
+
+  Object.keys(dados).forEach(k => {
+    if (dados[k] === "") delete dados[k];
+  });
+
+  return dados;
+}
+
+function validarAluno(d) {
+  if (!d.nome || d.nome.length < 3) return "Informe o nome completo do aluno.";
+  if (d.cpf && !cpfValido(d.cpf)) return "CPF invalido. Confira os numeros digitados.";
+  if (d.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email)) return "E-mail inválido.";
+  if (d.telefone && d.telefone.length < 10) return "Telefone inválido.";
+  if (d.whatsapp && d.whatsapp.length < 10) return "WhatsApp inválido.";
+  const senhaEl = $("#senhaAluno");
+  const confirmarEl = $("#confirmarSenhaAluno");
+  const senhaEditada = !$("#alunoId").value || senhaEl?.dataset.editado === "true" || confirmarEl?.dataset.editado === "true";
+  const senha = String(senhaEl?.value || "").trim();
+  const confirmar = String(confirmarEl?.value || "").trim();
+  if (senhaEditada && senha && senha.length < 4) return "A senha do aluno deve ter pelo menos 4 caracteres.";
+  if (senhaEditada && senha !== confirmar) return "A confirmação da senha do aluno não confere.";
+  return "";
+}
+
+function setSalvarLoading(ativo) {
+  salvando = ativo;
+  const btn = $("#btnSalvarAluno");
+  if (btn) {
+    btn.disabled = ativo;
+    btn.textContent = ativo ? "Salvando..." : ($("#alunoId")?.value ? "Salvar alterações" : "Cadastrar aluno");
+  }
+}
+
+function atualizarModoCadastroAluno() {
+  const editando = Boolean($("#alunoId")?.value);
+  const botaoSalvar = $("#btnSalvarAluno");
+  if (botaoSalvar && !salvando) botaoSalvar.textContent = editando ? "Salvar alterações" : "Cadastrar aluno";
+
+  const camposMatricula = document.querySelectorAll(".js-cadastro-matricula-field");
+  camposMatricula.forEach((bloco) => {
+    bloco.hidden = true;
+    bloco.querySelectorAll("input, select, textarea, button").forEach((el) => {
+      el.disabled = true;
+      el.required = false;
+    });
+  });
+}
+
+function trocarTab(nome) {
+  document.querySelectorAll(".tab").forEach(btn => btn.classList.toggle("active", btn.dataset.tab === nome));
+  document.querySelectorAll(".tab-panel").forEach(panel => panel.classList.toggle("active", panel.id === `tab-${nome}`));
+  atualizarWizardAlunoMobile();
+}
+
+function obterHistorico(id) {
+  try { return JSON.parse(localStorage.getItem(`fusion_historico_aluno_${id}`) || "[]"); }
+  catch { return []; }
+}
+
+function salvarHistorico(id, lista) {
+  localStorage.setItem(`fusion_historico_aluno_${id}`, JSON.stringify(lista));
+}
+
+function registrarHistoricoLocal(id, tipo, descricao) {
+  if (!id) return;
+  const lista = obterHistorico(id);
+  lista.unshift({ id: `hist_${Date.now()}`, tipo, descricao, data: new Date().toISOString() });
+  salvarHistorico(id, lista.slice(0, 50));
+}
+
+function adicionarHistoricoManual() {
+  const id = $("#alunoId").value;
+  if (!id) return mostrarAlerta("Salve ou selecione um aluno antes de adicionar histórico.", "erro");
+
+  const desc = prompt("Descreva o registro do histórico:");
+  if (!desc) return;
+
+  registrarHistoricoLocal(id, "manual", desc);
+  renderizarHistorico(obterHistorico(id));
+}
+
+function limparHistoricoLocal() {
+  const id = $("#alunoId").value;
+  if (!id) return mostrarAlerta("Selecione um aluno antes de limpar o histórico.", "erro");
+  if (!confirm("Confirma limpar o histórico local deste aluno?")) return;
+
+  localStorage.removeItem(`fusion_historico_aluno_${id}`);
+  renderizarHistorico([]);
+}
+
+function renderizarHistorico(lista) {
+  const el = $("#historicoLista");
+  if (!lista.length) {
+    el.innerHTML = `<div class="timeline-empty">Nenhum histórico local registrado para este aluno.</div>`;
+    return;
+  }
+
+  el.innerHTML = lista.map(item => `<div class="timeline-item">
+    <div class="timeline-dot"></div>
+    <div><strong>${escapeHtml(rotuloHistorico(item.tipo))}</strong><p>${escapeHtml(item.descricao)}</p><small>${escapeHtml(formatarDataHora(item.data))}</small></div>
+  </div>`).join("");
+}
+
+function rotuloHistorico(tipo) {
+  return { cadastro: "Cadastro", edicao: "Alteração", exclusao: "Exclusão", manual: "Registro manual", matricula: "Matrícula" }[tipo] || "Histórico";
+}
+
+
+function matriculaAtiva(lista) {
+  return (lista || []).find((m) => ["Ativa", "Pendente", "Trancada"].includes(String(m.status || ""))) || null;
+}
+
+function matriculaId(m) {
+  return m?.id || m?.matriculaId || m?.numero || "";
+}
+
+function matriculaTurma(m) {
+  return m?.turma || m?.turmaNome || m?.turma_id || m?.turmaId || "-";
+}
+
+function formatarDataCurta(v) {
+  if (!v) return "-";
+  const s = String(v).slice(0, 10);
+  const partes = s.split("-");
+  return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : s;
+}
+
+async function carregarMatriculasDoAluno(id) {
+  if (!id) return [];
+  try {
+    const resp = await fetch(`${API_MATRICULAS}?alunoId=${encodeURIComponent(id)}`, { cache: "no-store" });
+    const payload = await safeJson(resp);
+    if (!resp.ok || payload.ok === false) throw new Error(payload.erro || payload.mensagem || `Erro HTTP ${resp.status}`);
+    return extrairLista(payload);
+  } catch (erro) {
+    mostrarAlerta(`Não foi possível carregar matrículas do aluno. ${erro.message}`, "erro");
+    return [];
+  }
+}
+
+function renderizarMatriculasAluno(lista) {
+  const el = $("#matriculasAlunoLista");
+  if (!el) return;
+
+  if (!lista || !lista.length) {
+    const idAtual = escapeAttr($("#alunoId")?.value || "");
+    const acao = idAtual
+      ? `<button type="button" class="btn-light" onclick="window.abrirMatriculaAluno('${idAtual}')">Matricular aluno</button>`
+      : `<span>Salve o cadastro antes de criar a matricula.</span>`;
+    el.innerHTML = `<div class="timeline-empty">
+      <strong>Nenhuma matrícula vinculada.</strong>
+      <p style="margin:6px 0 12px;">Use matrícula para ativar plano, turma e modalidade sem misturar com a edição cadastral.</p>
+      ${acao}
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = lista.map((m) => {
+    const id = matriculaId(m);
+    const ativo = ["Ativa", "Pendente", "Trancada"].includes(String(m.status || ""));
+    return `<div class="mini-card" style="border:1px solid #e2e8f0;border-radius:12px;padding:12px;background:#fff;display:grid;gap:6px;">
+      <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;">
+        <h4 style="margin:0;">${escapeHtml(m.numero || id || "Matrícula")}</h4>
+        <span class="badge status-${escapeHtml(String(m.status || '').toLowerCase())}">${escapeHtml(m.status || "-")}</span>
+      </div>
+      <p style="margin:0;color:#475569;"><strong>Plano:</strong> ${escapeHtml(m.plano || "-")}</p>
+      <p style="margin:0;color:#475569;"><strong>Turma:</strong> ${escapeHtml(matriculaTurma(m))}</p>
+      <p style="margin:0;color:#475569;"><strong>Início:</strong> ${escapeHtml(formatarDataCurta(m.dataInicio || m.dataMatricula))} · <strong>Valor:</strong> R$ ${formatarMoeda(m.valorMensal || 0)}</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+        ${ativo ? `<button type="button" class="btn-light" onclick="abrirMatriculaAluno('${escapeAttr(m.alunoId || $('#alunoId').value)}')">Trocar turma/modalidade</button>` : ""}
+        <button type="button" class="btn-light" onclick="abrirFichaMatricula('${escapeAttr(id)}')">Ver ficha</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+async function atualizarMatriculasAlunoAtual() {
+  const id = $("#alunoId")?.value;
+  const el = $("#matriculasAlunoLista");
+  if (!id) {
+    if (el) el.innerHTML = `<div class="timeline-empty">Selecione ou salve um aluno para visualizar matrículas e turmas.</div>`;
+    matriculasAlunoAtual = [];
+    return [];
+  }
+  if (el) el.innerHTML = `<div class="timeline-empty">Carregando matrículas...</div>`;
+  matriculasAlunoAtual = await carregarMatriculasDoAluno(id);
+  renderizarMatriculasAluno(matriculasAlunoAtual);
+  return matriculasAlunoAtual;
+}
+
+window.abrirFichaMatricula = function(id) {
+  if (!id) return mostrarAlerta("Matrícula não identificada.", "erro");
+  location.href = `/pages/matriculas/ficha.html?id=${encodeURIComponent(id)}`;
+};
+
+window.abrirFluxoMatriculaAluno = async function(id) {
+  if (!id) return mostrarAlerta("Aluno não identificado.", "erro");
+
+  const aluno = alunos.find((a) => String(alunoId(a)) === String(id));
+  const status = aluno ? alunoStatus(aluno) : "";
+
+  if (status === "ativo") {
+    try {
+      const lista = await carregarMatriculasDoAluno(id);
+      const ativa = matriculaAtiva(lista);
+      if (ativa) {
+        window.abrirFichaMatricula(matriculaId(ativa));
+        return;
+      }
+    } catch {}
+
+    mostrarAlerta("Aluno já está ativo. Abra a ficha da matrícula para alterações.", "info");
+    return;
+  }
+
+  window.abrirMatriculaAluno(id);
+};
+
+window.abrirMatriculaAluno = function(id, opcoes = {}) {
+  if (!id) return mostrarAlerta("Aluno nao identificado.", "erro");
+  const params = new URLSearchParams({ alunoId: id });
+  if (opcoes.origem) params.set("origem", opcoes.origem);
+  location.href = `/pages/matriculas/cadastro.html?${params.toString()}`;
+};
+
+function abrirMatriculaDoModal() {
+  const id = $("#alunoId")?.value;
+  if (!id) return mostrarAlerta("Salve ou selecione um aluno antes de abrir matrícula.", "erro");
+  window.abrirMatriculaAluno(id);
+}
+
+function abrirMatriculaAtivaDoAluno() {
+  const ativa = matriculaAtiva(matriculasAlunoAtual);
+  if (!ativa) return mostrarAlerta("Este aluno ainda não possui matrícula ativa.", "erro");
+  window.abrirFichaMatricula(matriculaId(ativa));
+}
+
+function abrirIntegracao(destino) {
+  const id = $("#alunoId").value;
+  if (!id) return mostrarAlerta("Selecione ou salve um aluno antes de abrir integrações.", "erro");
+
+  const rotas = {
+    avaliacoes: "/pages/avaliacoes/index.html",
+    mensalidades: "/pages/mensalidades/index.html",
+    checkin: "/pages/checkin/index.html"
+  };
+
+  location.href = `${rotas[destino]}?alunoId=${encodeURIComponent(id)}`;
+}
+
+function formatarCpfVisual(v) {
+  const n = somenteNumeros(v).slice(0, 11);
+  return n.replace(/^(\d{3})(\d)/, "$1.$2")
+    .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3-$4");
+}
+
+function formatarTelefoneVisual(v) {
+  const n = somenteNumeros(v).slice(0, 11);
+  return n.length <= 10
+    ? n.replace(/^(\d{2})(\d)/, "($1) $2").replace(/(\d{4})(\d)/, "$1-$2")
+    : n.replace(/^(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d)/, "$1-$2");
+}
+
+async function processarFoto(ev) {
+  const f = ev.target.files?.[0];
+
+  if (!f) {
+    fotoBase64Atual = "";
+    atualizarPreviewFoto("");
+    return;
+  }
+
+  if (!f.type.startsWith("image/")) {
+    mostrarAlerta("Selecione uma imagem válida.", "erro");
+    ev.target.value = "";
+    return;
+  }
+
+  if (f.size > 700 * 1024) {
+    mostrarAlerta("A foto deve ter até 700 KB.", "erro");
+    ev.target.value = "";
+    return;
+  }
+
+  fotoBase64Atual = await arquivoParaBase64(f);
+  atualizarPreviewFoto(fotoBase64Atual);
+}
+
+function arquivoParaBase64(f) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("Falha ao ler imagem"));
+    reader.readAsDataURL(f);
+  });
+}
+
+function atualizarPreviewFoto(src) {
+  $("#fotoPreview").innerHTML = src ? `<img src="${escapeAttr(src)}" alt="Foto do aluno">` : "Foto";
+}
+
+window.imprimirFichaPorId = function(id) {
+  const a = alunos.find(x => String(alunoId(x)) === String(id));
+  if (!a) return mostrarAlerta("Aluno não encontrado.", "erro");
+  imprimirFicha(a);
+};
+
+function imprimirFichaAtual() {
+  const id = $("#alunoId").value;
+  const a = alunos.find(x => String(alunoId(x)) === String(id));
+  imprimirFicha(a ? { ...a, ...coletarDadosFormulario() } : coletarDadosFormulario());
+}
+
+function imprimirFicha(a) {
+  if (!a?.nome) return mostrarAlerta("Informe o nome para imprimir a ficha.", "erro");
+
+  const hist = alunoId(a) ? obterHistorico(alunoId(a)) : [];
+
+  const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Ficha Completa</title>
+  <style>body{font-family:Arial;margin:32px;color:#0f172a}h1{color:#ff6600}.box{border:1px solid #cbd5e1;border-radius:10px;padding:18px;margin-bottom:14px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.label{font-size:12px;color:#64748b;text-transform:uppercase}.value{font-size:16px}.foto{width:120px;height:120px;border:1px solid #cbd5e1;border-radius:10px;object-fit:cover;float:right}.hist{border-left:3px solid #ff6600;padding-left:12px;margin:10px 0}</style></head>
+  <body>${(a.foto_base64 || a.foto) ? `<img class="foto" src="${escapeAttr(a.foto_base64 || a.foto)}">` : ""}
+  <h1>Fusion ERP</h1><p>Ficha completa do aluno</p>
+  <h2>Dados cadastrais</h2><div class="box"><div class="grid">
+  ${campoFicha("Nome", alunoNome(a))}${campoFicha("CPF", formatarCpfVisual(alunoCpf(a)))}${campoFicha("Telefone", formatarTelefoneVisual(alunoTelefone(a)))}${campoFicha("E-mail", alunoEmail(a))}${campoFicha("Plano", alunoPlano(a))}${campoFicha("Professor", a.professor_responsavel || "")}${campoFicha("Status", alunoStatus(a))}${campoFicha("Matrícula", a.data_matricula || "")}
+  </div></div>
+  <h2>Dados médicos</h2><div class="box"><div class="grid">${campoFicha("Tipo sanguíneo", a.tipo_sanguineo || "")}${campoFicha("Peso", a.peso || "")}${campoFicha("Altura", a.altura || "")}${campoFicha("Objetivo", a.objetivo || "")}</div><p><b>Alergias:</b> ${escapeHtml(a.alergias || "")}</p><p><b>Restrições:</b> ${escapeHtml(a.restricoes_medicas || "")}</p><p><b>Observações:</b> ${escapeHtml(a.observacoes || "")}</p></div>
+  <h2>Histórico local</h2><div class="box">${hist.length ? hist.map(x => `<div class="hist"><b>${escapeHtml(rotuloHistorico(x.tipo))}</b><br>${escapeHtml(x.descricao)}<br><small>${escapeHtml(formatarDataHora(x.data))}</small></div>`).join("") : "Nenhum histórico local registrado."}</div>
+  <script>window.print();</script></body></html>`;
+
+  const win = window.open("", "_blank", "width=900,height=700");
+  if (!win) return mostrarAlerta("O navegador bloqueou a janela de impressão.", "erro");
+  win.document.open();
+  win.document.write(html);
+  win.document.close();
+}
+
+function campoFicha(label, valor) {
+  return `<div><div class="label">${escapeHtml(label)}</div><div class="value">${escapeHtml(valor)}</div></div>`;
+}
+
+function formatarDataHora(d) {
+  try { return new Date(d).toLocaleString("pt-BR"); }
+  catch { return d || ""; }
+}
+
+async function safeJson(resp) {
+  try { return await resp.json(); }
+  catch { return {}; }
+}
+
+function escapeHtml(v) {
+  return String(v ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function escapeAttr(v) {
+  return escapeHtml(v).replaceAll("`", "&#096;");
+}
+
+
+// Fusion ERP 2.9.3 — Mobile First Alunos
+const ALUNO_WIZARD_STEPS = ["cadastro", "medico", "historico", "matriculas", "integracoes"];
+
+function passoAtualAlunoMobile() {
+  const ativo = document.querySelector(".tab.active")?.dataset?.tab || "cadastro";
+  return Math.max(0, ALUNO_WIZARD_STEPS.indexOf(ativo));
+}
+
+function moverPassoAlunoMobile(delta) {
+  const atual = passoAtualAlunoMobile();
+  const proximo = Math.max(0, Math.min(ALUNO_WIZARD_STEPS.length - 1, atual + delta));
+  trocarTab(ALUNO_WIZARD_STEPS[proximo]);
+}
+
+function atualizarWizardAlunoMobile() {
+  const atual = passoAtualAlunoMobile();
+  const anterior = document.getElementById("btnAlunoStepAnterior");
+  const proximo = document.getElementById("btnAlunoStepProximo");
+  const salvar = document.getElementById("btnSalvarAluno");
+  const titulo = document.getElementById("modalTitulo");
+  if (anterior) anterior.disabled = atual <= 0;
+  if (proximo) proximo.textContent = atual >= ALUNO_WIZARD_STEPS.length - 1 ? "Revisar" : "Próximo";
+  if (salvar) salvar.classList.toggle("salvar-final", atual >= ALUNO_WIZARD_STEPS.length - 1);
+  if (titulo) titulo.dataset.step = `${atual + 1} de ${ALUNO_WIZARD_STEPS.length}`;
+}
+
+function prepararAlunosMobile() {
+  document.body.classList.add("alunos-mobile-ready");
+
+  const actions = document.querySelector(".modal-actions");
+  if (actions && !document.getElementById("btnAlunoStepAnterior")) {
+    const anterior = document.createElement("button");
+    anterior.type = "button";
+    anterior.id = "btnAlunoStepAnterior";
+    anterior.className = "btn-light aluno-step-btn";
+    anterior.textContent = "Anterior";
+    anterior.addEventListener("click", () => moverPassoAlunoMobile(-1));
+
+    const proximo = document.createElement("button");
+    proximo.type = "button";
+    proximo.id = "btnAlunoStepProximo";
+    proximo.className = "fusion-button aluno-step-btn aluno-step-next";
+    proximo.textContent = "Próximo";
+    proximo.addEventListener("click", () => moverPassoAlunoMobile(1));
+
+    const cancelar = document.getElementById("btnCancelar");
+    actions.insertBefore(anterior, cancelar || actions.firstChild);
+    actions.insertBefore(proximo, document.getElementById("btnSalvarAluno"));
+  }
+
+  document.querySelectorAll("[data-alunos-action]").forEach(btn => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = "1";
+    btn.addEventListener("click", () => {
+      const act = btn.dataset.alunosAction;
+      if (act === "home") location.href = "/pages/dashboard/index.html";
+      if (act === "buscar") document.getElementById("buscaAluno")?.focus();
+      if (act === "novo") abrirNovoAluno();
+      if (act === "topo") window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
+
+  atualizarWizardAlunoMobile();
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const ao = (seletor, evento, handler) => {
+    const elemento = $(seletor);
+    if (elemento) elemento.addEventListener(evento, handler);
+  };
+
+  try {
+    prepararAlunosMobile();
+  } catch (erro) {
+    console.warn("Falha ao preparar interface móvel de alunos:", erro);
+  }
+  atualizarModoCadastroAluno();
+
+  ao("#btnNovoAluno", "click", abrirNovoAluno);
+  ao("#btnAtualizar", "click", async () => {
+    await Promise.allSettled([
+      carregarProfessores(),
+      carregarPlanos(),
+      carregarAlunos()
+    ]);
+  });
+  ao("#btnFecharModal", "click", fecharModal);
+  ao("#btnCancelar", "click", fecharModal);
+  ao("#btnFicha", "click", imprimirFichaAtual);
+  ao("#formAluno", "submit", salvarAluno);
+  ao("#foto_base64", "change", processarFoto);
+  ao("#btnRecarregarPlanos", "click", () => carregarPlanos($("#plano")?.value || ""));
+
+  ao("#btnAddHistorico", "click", adicionarHistoricoManual);
+  ao("#btnLimparHistorico", "click", limparHistoricoLocal);
+  ao("#btnNovaMatriculaAluno", "click", abrirMatriculaDoModal);
+  ao("#btnAbrirMatriculaAtiva", "click", abrirMatriculaAtivaDoAluno);
+  ao("#btnAtualizarMatriculasAluno", "click", atualizarMatriculasAlunoAtual);
+
+  ao("#btnAbrirAvaliacoes", "click", () => abrirIntegracao("avaliacoes"));
+  ao("#btnAbrirMensalidades", "click", () => abrirIntegracao("mensalidades"));
+  ao("#btnAbrirCheckin", "click", () => abrirIntegracao("checkin"));
+
+  document.querySelectorAll(".tab").forEach(btn => btn.addEventListener("click", () => {
+    trocarTab(btn.dataset.tab);
+    if (btn.dataset.tab === "matriculas") atualizarMatriculasAlunoAtual();
+  }));
+
+  ao("#cpf", "input", e => e.target.value = formatarCpfVisual(e.target.value));
+  ao("#data_nascimento", "input", atualizarIdadeAluno);
+  ao("#data_nascimento", "change", atualizarIdadeAluno);
+  ao("#telefone", "input", e => e.target.value = formatarTelefoneVisual(e.target.value));
+  ao("#whatsapp", "input", e => e.target.value = formatarTelefoneVisual(e.target.value));
+  ao("#senhaAluno", "input", e => { e.target.dataset.editado = "true"; });
+  ao("#confirmarSenhaAluno", "input", e => { e.target.dataset.editado = "true"; });
+  ao("#professor_responsavel", "change", sincronizarProfessorSelecionado);
+  ao("#dia_vencimento_mensal", "input", e => {
+    e.target.value = String(e.target.value || "").replace(/\D/g, "").slice(0, 2);
+  });
+
+  ao("#buscaAluno", "input", () => { pagina = 1; renderizarTabela(); });
+  ao("#filtroStatus", "change", () => { pagina = 1; renderizarTabela(); });
+  ao("#filtroPlano", "change", () => { pagina = 1; renderizarTabela(); });
+
+  ao("#btnAnterior", "click", () => {
+    if (pagina > 1) {
+      pagina--;
+      renderizarTabela();
+    }
+  });
+
+  ao("#btnProxima", "click", () => {
+    const total = Math.max(Math.ceil(alunosFiltrados().length / porPagina), 1);
+    if (pagina < total) {
+      pagina++;
+      renderizarTabela();
+    }
+  });
+
+  ao("#modalAluno", "click", e => {
+    if (e.target.id === "modalAluno") fecharModal();
+  });
+
+  const resultados = await Promise.allSettled([
+    carregarProfessores(),
+    carregarPlanos(),
+    carregarAlunos()
+  ]);
+
+  resultados.forEach((resultado, indice) => {
+    if (resultado.status === "rejected") {
+      const nomes = ["professores", "planos", "alunos"];
+      console.error(`Falha ao carregar ${nomes[indice]}:`, resultado.reason);
+    }
+  });
+});
+
+
+function inicializarPainelComercialMatricula() {
+  const ids = ["plano", "cobrar_taxa_matricula", "valor_taxa_matricula", "desconto_matricula"];
+  ids.forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el || el.dataset.painelComercialOk) return;
+    el.dataset.painelComercialOk = "1";
+    const evento = id === "plano" || id === "cobrar_taxa_matricula" ? "change" : "input";
+    el.addEventListener(evento, () => {
+      const taxaInput = document.getElementById("valor_taxa_matricula");
+      if (id === "valor_taxa_matricula") {
+        taxaInput.dataset.editado = "1";
+      } else if (id === "plano" || id === "cobrar_taxa_matricula") {
+        delete taxaInput?.dataset.editado;
+        delete taxaInput?.dataset.inicializado;
+      }
+      atualizarPainelComercialMatricula();
+    });
+  });
+  atualizarPainelComercialMatricula();
+}
+
+setTimeout(inicializarPainelComercialMatricula, 0);
+
+// Fusion ERP 2.8.0 — Biometria Futronic integrada ao cadastro do aluno
+(() => {
+  const API_BIOMETRIA = "/api/biometria";
+  const estado = { ocupada: false };
+  const el = (id) => document.getElementById(id);
+
+  async function bioApi(caminho, opcoes = {}) {
+    const resposta = await fetch(`${API_BIOMETRIA}${caminho}`, {
+      ...opcoes,
+      headers: { "Content-Type": "application/json", ...(opcoes.headers || {}) }
+    });
+    const json = await resposta.json().catch(() => ({}));
+    if (!resposta.ok || json.ok === false) throw new Error(json.mensagem || `Erro HTTP ${resposta.status}`);
+    return json;
+  }
+
+  function alunoAtual() {
+    return { id: String(el("alunoId")?.value || "").trim(), nome: String(el("nome")?.value || "").trim() };
+  }
+
+  function mensagem(texto, tipo = "") {
+    const box = el("biometriaMensagem");
+    if (!box) return;
+    box.textContent = texto;
+    box.className = `biometria-mensagem ${tipo}`.trim();
+  }
+
+  function atualizarVinculo() {
+    const aluno = alunoAtual();
+    if (el("biometriaAlunoNome")) el("biometriaAlunoNome").textContent = aluno.nome || "Aluno ainda não salvo";
+    if (el("biometriaAlunoId")) el("biometriaAlunoId").textContent = aluno.id || "Salve o aluno primeiro";
+    return aluno;
+  }
+
+  function renderAmostras(concluidas = false, qualidade = 0) {
+    document.querySelectorAll("#biometriaCapturas [data-captura]").forEach((card, indice) => {
+      card.classList.toggle("aceita", concluidas);
+      card.classList.remove("rejeitada");
+      const strong = card.querySelector("strong");
+      if (strong) strong.textContent = concluidas ? `${qualidade}% — aceita` : "Aguardando";
+    });
+    const salvar = el("btnBiometriaSalvar");
+    if (salvar) { salvar.disabled = true; salvar.textContent = "Salvo automaticamente"; }
+  }
+
+  async function testarLeitor() {
+    try {
+      const r = await bioApi("/status");
+      const local = r.local || {};
+      const conectado = local.conectado !== false && local.ok !== false;
+      if (el("biometriaLeitor")) el("biometriaLeitor").textContent = conectado ? "Conectado" : "Desconectado";
+      mensagem(conectado ? `Futronic conectada (${local.largura || 320}×${local.altura || 480}).` : "Leitor Futronic não conectado.", conectado ? "sucesso" : "erro");
+      return conectado;
+    } catch (e) {
+      if (el("biometriaLeitor")) el("biometriaLeitor").textContent = "Indisponível";
+      mensagem(e.message, "erro");
+      return false;
+    }
+  }
+
+  async function carregarCadastro() {
+    const aluno = atualizarVinculo();
+    renderAmostras(false);
+    if (!aluno.id) {
+      if (el("biometriaStatus")) el("biometriaStatus").textContent = "Salve o aluno primeiro";
+      if (el("btnBiometriaApagar")) el("btnBiometriaApagar").disabled = true;
+      return;
+    }
+    try {
+      const r = await bioApi(`/aluno/${encodeURIComponent(aluno.id)}`);
+      const bio = r.biometria;
+      if (el("biometriaStatus")) el("biometriaStatus").textContent = bio ? `Cadastrada — qualidade ${bio.qualidadeMedia || bio.qualidade || 0}%` : "Não cadastrada";
+      if (el("btnBiometriaApagar")) el("btnBiometriaApagar").disabled = !bio;
+      if (bio) renderAmostras(true, bio.qualidadeMedia || bio.qualidade || 0);
+    } catch (e) { mensagem(e.message, "erro"); }
+  }
+
+  async function abrirAba() {
+    atualizarVinculo();
+    await testarLeitor();
+    await carregarCadastro();
+  }
+
+  async function cadastrar() {
+    if (estado.ocupada) return;
+    const aluno = atualizarVinculo();
+    if (!aluno.id) return mensagem("Salve o aluno antes de cadastrar a biometria.", "erro");
+    estado.ocupada = true;
+    const botao = el("btnBiometriaCapturar");
+    if (botao) { botao.disabled = true; botao.textContent = "Aguardando as 3 amostras..."; }
+    renderAmostras(false);
+    mensagem("Coloque o mesmo dedo no leitor. O SDK solicitará três amostras; retire e recoloque quando indicado.");
+    try {
+      const r = await bioApi("/sdk/cadastrar", {
+        method: "POST",
+        body: JSON.stringify({ alunoId: aluno.id, alunoNome: aluno.nome })
+      });
+      const bio = r.biometria || {};
+      renderAmostras(true, bio.qualidadeMedia || bio.qualidade || 0);
+      mensagem(r.mensagem || "Biometria cadastrada e vinculada ao aluno.", "sucesso");
+      await carregarCadastro();
+      if (typeof carregarAlunos === "function") await carregarAlunos();
+    } catch (e) {
+      renderAmostras(false);
+      mensagem(e.message, "erro");
+    } finally {
+      estado.ocupada = false;
+      if (botao) { botao.disabled = false; botao.textContent = "Cadastrar biometria"; }
+    }
+  }
+
+  async function apagar() {
+    const aluno = alunoAtual();
+    if (!aluno.id || !confirm(`Apagar definitivamente a biometria de ${aluno.nome || "este aluno"}?`)) return;
+    try {
+      await bioApi(`/aluno/${encodeURIComponent(aluno.id)}`, { method: "DELETE" });
+      renderAmostras(false);
+      mensagem("Biometria apagada.", "sucesso");
+      await carregarCadastro();
+      if (typeof carregarAlunos === "function") await carregarAlunos();
+    } catch (e) { mensagem(e.message, "erro"); }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    el("btnBiometriaTestar")?.addEventListener("click", testarLeitor);
+    el("btnBiometriaCapturar")?.addEventListener("click", cadastrar);
+    el("btnBiometriaSalvar")?.addEventListener("click", cadastrar);
+    el("btnBiometriaRepetir")?.addEventListener("click", cadastrar);
+    el("btnBiometriaApagar")?.addEventListener("click", apagar);
+    document.querySelector('[data-tab="biometria"]')?.addEventListener("click", abrirAba);
+  });
+})();
+
+async function sincronizarAlunosSupabase() {
+  const botao = $("#btnSincronizarSupabase");
+  if (!botao || botao.disabled) return;
+  const confirmar = window.confirm("Copiar os alunos locais para o novo Supabase? A base local continuará sendo a fonte principal nesta etapa.");
+  if (!confirmar) return;
+
+  const textoOriginal = botao.textContent;
+  botao.disabled = true;
+  botao.textContent = "Sincronizando...";
+  mostrarAlerta("Enviando alunos para o Supabase. Não feche esta página.", "info");
+
+  try {
+    const resp = await fetch(`${API_ALUNOS}/sincronizar-supabase`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{}"
+    });
+    const payload = await safeJson(resp);
+    if (!resp.ok) throw new Error(payload.mensagem || payload.erro || `HTTP ${resp.status}`);
+    mostrarAlerta(`${payload.enviados || 0} aluno(s) sincronizado(s) com sucesso.`, "sucesso");
+  } catch (erro) {
+    mostrarAlerta(`Falha na sincronização: ${erro.message}`, "erro");
+  } finally {
+    botao.disabled = false;
+    botao.textContent = textoOriginal;
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  $("#btnSincronizarSupabase")?.addEventListener("click", sincronizarAlunosSupabase);
+});

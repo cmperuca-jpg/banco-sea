@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Fusion Sistema - Meus Treinos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  
+  <script src="/assets/js/fusion-auth.js"></script>
+  <script>FusionAuth.proteger();</script>
+
+  <!-- Fusion Sistema: template global único -->
+  <link rel="stylesheet" href="/assets/css/fusion-app.css?v=20260730-template-unico-1">
+  <link rel="stylesheet" href="/assets/css/fusion-theme.css?v=20260730-template-unico-1">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="/assets/css/fusion-menu-global.css?v=20260730-template-unico-1">
+</head>
+<body>
+  <main class="page">
+    <header class="top">
+      <div>
+        <h1>Meus Treinos</h1>
+        <p>Treinos ativos, exercícios e execução do dia.</p>
+      </div>
+      <a href="/pages/portal-aluno-operacional/index.html">Portal</a>
+    </header>
+
+    <section class="card filtros">
+      <label>ID do aluno
+        <input id="alunoId" placeholder="ID do aluno">
+      </label>
+      <button id="btnCarregar">Carregar</button>
+    </section>
+
+    <section id="treinos"></section>
+  </main>
+  <script src="./index.js"></script>
+  <script src="/assets/js/fusion-layout.js"></script>
+</body>
+</html>

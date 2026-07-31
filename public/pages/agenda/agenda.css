@@ -1,0 +1,360 @@
+.page-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.page-actions h2 {
+  margin: 0;
+  color: #0f172a;
+}
+
+.page-actions p {
+  margin: 6px 0 0;
+  color: #64748b;
+}
+
+.filtros-agenda {
+  display: grid;
+  grid-template-columns: 1fr 220px 220px auto auto;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.filtros-agenda input,
+.filtros-agenda select,
+.form-grid input,
+.form-grid select,
+.form-grid textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 11px;
+  font: inherit;
+}
+
+.agenda-lista {
+  display: grid;
+  gap: 14px;
+}
+
+.aula-card {
+  display: grid;
+  grid-template-columns: 90px 1fr auto;
+  gap: 16px;
+  align-items: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px;
+  background: #ffffff;
+}
+
+.aula-hora {
+  font-weight: 800;
+  color: #22b8d2;
+}
+
+.aula-info h3 {
+  margin: 0 0 6px;
+  color: #0f172a;
+}
+
+.aula-info p {
+  margin: 3px 0;
+  color: #475569;
+}
+
+.badge {
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.badge.ativa {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badge.cancelada {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.badge.concluida {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.aula-acoes {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-light,
+.btn-danger {
+  border: none;
+  border-radius: 10px;
+  padding: 11px 15px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.btn-primary {
+  background: #22b8d2;
+  color: white;
+}
+
+.btn-secondary {
+  background: #1e293b;
+  color: white;
+}
+
+.btn-light {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: white;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.6);
+  z-index: 50;
+}
+
+.modal-overlay.ativo {
+  display: flex;
+}
+
+.modal {
+  width: min(820px, 94vw);
+  max-height: 92vh;
+  overflow: auto;
+  background: white;
+  border-radius: 18px;
+  padding: 22px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.modal-header button {
+  border: none;
+  background: transparent;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.form-grid label {
+  display: grid;
+  gap: 6px;
+  color: #334155;
+  font-weight: 700;
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .filtros-agenda,
+  .dashboard-grid,
+  .form-grid,
+  .aula-card {
+    grid-template-columns: 1fr;
+  }
+
+  .page-actions {
+    display: grid;
+    gap: 12px;
+  }
+}
+
+/* Fusion Sistema — modal profissional e responsivo (Agenda) */
+#modalAula.modal-overlay {
+  z-index: 30000 !important;
+  padding: 20px !important;
+  overflow: hidden !important;
+  background: rgba(10, 26, 38, 0.68) !important;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+#modalAula .modal {
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  box-sizing: border-box !important;
+  width: min(860px, calc(100vw - 40px)) !important;
+  max-height: calc(100dvh - 40px) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid #cbdbe4 !important;
+  border-radius: 18px !important;
+  background: #ffffff !important;
+  box-shadow: 0 26px 70px rgba(2, 18, 28, 0.36) !important;
+}
+
+#modalAula .modal-header {
+  z-index: 4 !important;
+  min-height: 64px !important;
+  margin: 0 !important;
+  padding: 12px 16px 12px 22px !important;
+  border-bottom: 1px solid #2c6271 !important;
+  background: #164553 !important;
+  color: #ffffff !important;
+}
+
+#modalAula .modal-header h2 {
+  margin: 0 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  font-size: 23px !important;
+  line-height: 1.2 !important;
+  text-shadow: none !important;
+}
+
+#modalAula #btnFecharModal {
+  display: inline-grid !important;
+  place-items: center !important;
+  width: 42px !important;
+  min-width: 42px !important;
+  height: 42px !important;
+  padding: 0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.32) !important;
+  border-radius: 11px !important;
+  background: #22b8d2 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  font-size: 27px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+}
+
+#modalAula #btnFecharModal:hover,
+#modalAula #btnFecharModal:focus-visible {
+  background: #159db7 !important;
+  outline: 3px solid rgba(34, 184, 210, 0.28) !important;
+  outline-offset: 2px !important;
+}
+
+#modalAula #formAula {
+  min-height: 0 !important;
+  padding: 20px 22px 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  align-content: start !important;
+  gap: 15px 16px !important;
+}
+
+#modalAula .form-grid label {
+  margin: 0 !important;
+  color: #213b4d !important;
+  -webkit-text-fill-color: #213b4d !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+}
+
+#modalAula input,
+#modalAula select,
+#modalAula textarea {
+  min-height: 44px !important;
+  border-color: #b9ccda !important;
+  background: #ffffff !important;
+  color: #142d3d !important;
+  -webkit-text-fill-color: #142d3d !important;
+}
+
+#modalAula textarea {
+  min-height: 92px !important;
+}
+
+#modalAula .modal-actions {
+  position: sticky !important;
+  bottom: 0 !important;
+  z-index: 5 !important;
+  min-height: 68px !important;
+  margin: 4px -22px 0 !important;
+  padding: 12px 22px !important;
+  border-top: 1px solid #d7e3ea !important;
+  background: rgba(248, 251, 252, 0.98) !important;
+  box-shadow: 0 -8px 20px rgba(15, 35, 48, 0.07) !important;
+}
+
+#modalAula .modal-actions button {
+  min-width: 112px !important;
+  min-height: 42px !important;
+  font-weight: 800 !important;
+}
+
+#modalAula .modal-actions .btn-light {
+  border: 1px solid #22b8d2 !important;
+  background: #ffffff !important;
+  color: #08788d !important;
+  -webkit-text-fill-color: #08788d !important;
+}
+
+#modalAula .modal-actions .btn-primary {
+  background: #22b8d2 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+@media (max-width: 640px) {
+  #modalAula.modal-overlay {
+    padding: 8px !important;
+  }
+
+  #modalAula .modal {
+    width: calc(100vw - 16px) !important;
+    max-height: calc(100dvh - 16px) !important;
+    border-radius: 14px !important;
+  }
+
+  #modalAula #formAula {
+    grid-template-columns: 1fr !important;
+    padding: 16px 14px 0 !important;
+  }
+
+  #modalAula .modal-actions {
+    margin-right: -14px !important;
+    margin-left: -14px !important;
+    padding: 10px 14px !important;
+  }
+
+  #modalAula .modal-actions button {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+  }
+}

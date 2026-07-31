@@ -1,0 +1,25 @@
+FUSION SISTEMA — ETAPA 1: SUPABASE AUTH
+
+Arquivos deste pacote:
+- .env.example
+- .env.fusion-novo.example
+- CONFIGURAR-SUPABASE-NOVO.bat
+- config/env.mjs
+- docs/ETAPA-1-SUPABASE-AUTH.md
+- modules/auth/auth.routes.mjs
+- modules/auth/auth.service.mjs
+- modules/security/api-security.middleware.mjs
+- package.json
+- public/assets/js/fusion-auth.js
+- public/pages/login/index.html
+- scripts/configurar-supabase-novo.mjs
+- supabase/migrations/20260731_fusion_sistema_novo_base.sql
+
+APLICAÇÃO
+1. Extraia este ZIP sobre a pasta fusion-erp e confirme a substituição dos arquivos.
+2. Execute CONFIGURAR-SUPABASE-NOVO.bat ou npm run configurar:supabase-novo.
+3. Execute npm install.
+4. Execute npm run dev.
+5. Abra http://localhost:3000/pages/login/index.html.
+
+Nesta etapa, somente a autenticação principal usa o Supabase novo. Os dados dos módulos continuam nos JSON locais até a próxima migração.

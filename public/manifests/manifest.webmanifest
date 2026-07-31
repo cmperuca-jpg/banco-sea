@@ -1,0 +1,42 @@
+{
+  "id": "/pages/login/",
+  "name": "Fusion Sistema",
+  "short_name": "Fusion Sistema",
+  "description": "Fusion Sistema instalado como aplicativo PWA.",
+  "start_url": "/pages/login/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui",
+    "browser"
+  ],
+  "background_color": "#111827",
+  "theme_color": "#22b8d2",
+  "orientation": "portrait-primary",
+  "categories": [
+    "business",
+    "productivity"
+  ],
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/assets/pwa/icons/fusion-icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/pwa/icons/fusion-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/pwa/icons/fusion-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

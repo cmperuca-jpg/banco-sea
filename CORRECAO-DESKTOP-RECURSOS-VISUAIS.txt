@@ -1,0 +1,16 @@
+FUSION SISTEMA 3.0.0-beta.2
+Correção do aplicativo instalado sem formatação visual.
+
+Alterações:
+- CSS, JavaScript, imagens e fontes passam a ser copiados para resources/public.
+- O servidor local usa FUSION_PUBLIC_ROOT no aplicativo instalado.
+- O Electron valida HTML, CSS e JavaScript antes de abrir a janela.
+- A geração remove arquivos antigos e valida o conteúdo do instalador.
+
+Aplicação:
+1. Feche o Fusion Sistema pelo ícone ao lado do relógio: botão direito > Sair.
+2. Extraia este ZIP na pasta pai do projeto e confirme a substituição.
+3. Execute GERAR-INSTALADOR-WINDOWS.bat.
+4. Instale o novo FusionSistema-Setup.exe.
+
+Os dados locais do aplicativo não são apagados pela reinstalação.

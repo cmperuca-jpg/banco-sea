@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fusion Sistema - BI Operacional</title>
+
+  <script src="/assets/js/fusion-auth.js"></script>
+  <script>FusionAuth.proteger();</script>
+  <meta name="fusion-existing-pages" content="access-engine,admin,agenda,aluno-avaliacao,aluno-login,aluno-treinos,alunos,avaliacoes,bi-academia,bi-academia-operacional,bi-financeiro,caixa,checkin,comercial,comercial-painel,configuracoes,dashboard,financeiro,matricula-online,matriculas,matriculas-pendentes,mensalidades,modalidades,natacao-professor,planos,professor-area,professor-login,professores,recebimentos,relatorios-caixa,treinos,turmas">
+
+  <link rel="manifest" href="/manifest-sistema.webmanifest">
+  <meta name="theme-color" content="#22b8d2">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="/assets/pwa/icons/fusion-icon-180.png">
+
+  <link rel="stylesheet" href="/assets/css/fusion-app.css?v=20260730-template-unico-1">
+  <link rel="stylesheet" href="/assets/pwa/fusion-pwa-mobile.css">
+  <link rel="stylesheet" href="/assets/css/fusion-mobile-final.css">
+  <link rel="stylesheet" href="/assets/css/fusion-theme.css?v=20260730-template-unico-1">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/bi-academia-operacional.css?v=20260730-profissional-1">
+  <link rel="stylesheet" href="/assets/css/fusion-menu-global.css?v=20260730-template-unico-1">
+</head>
+<body class="bi-operacional-page">
+
+<main class="main bi-operacional-main">
+  <section class="card bi-hero">
+    <div class="bi-hero__content">
+      <span class="bi-eyebrow">Inteligência operacional</span>
+      <h1>BI Operacional</h1>
+      <p>Acompanhe capacidade, professores, agenda e ocupação das turmas em uma visão gerencial.</p>
+    </div>
+
+    <div class="bi-hero__actions">
+      <button class="bi-btn bi-btn--secondary" type="button" onclick="exportarCSV()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"/></svg>
+        Exportar CSV
+      </button>
+    </div>
+  </section>
+
+  <section class="card bi-filters" aria-labelledby="tituloFiltros">
+    <div class="bi-section-heading bi-section-heading--compact">
+      <div>
+        <h2 id="tituloFiltros">Período analisado</h2>
+        <p>Defina um intervalo para atualizar todos os indicadores da página.</p>
+      </div>
+      <span id="statusAtualizacao" class="bi-update-status" aria-live="polite">Dados atualizados</span>
+    </div>
+
+    <div class="bi-filter-grid">
+      <label class="bi-field">
+        <span>Data inicial</span>
+        <input id="filtroInicio" type="date">
+      </label>
+
+      <label class="bi-field">
+        <span>Data final</span>
+        <input id="filtroFim" type="date">
+      </label>
+
+      <div class="bi-filter-actions">
+        <button id="btnAtualizar" class="bi-btn bi-btn--primary" type="button" onclick="carregarDashboard()">Atualizar painel</button>
+        <button class="bi-btn bi-btn--ghost" type="button" onclick="limparFiltros()">Limpar</button>
+      </div>
+    </div>
+
+    <div id="erroDashboard" class="bi-alert" role="alert" hidden></div>
+  </section>
+
+  <section class="bi-kpi-grid" aria-label="Indicadores operacionais">
+    <article class="card bi-kpi-card">
+      <div class="bi-kpi-card__top"><span>Turmas ativas</span><i aria-hidden="true"></i></div>
+      <strong id="kpiTurmasAtivas">0</strong>
+      <small>Em operação no período</small>
+    </article>
+    <article class="card bi-kpi-card">
+      <div class="bi-kpi-card__top"><span>Capacidade total</span><i aria-hidden="true"></i></div>
+      <strong id="kpiCapacidadeTotal">0</strong>
+      <small>Vagas disponíveis nas turmas</small>
+    </article>
+    <article class="card bi-kpi-card">
+      <div class="bi-kpi-card__top"><span>Professores ativos</span><i aria-hidden="true"></i></div>
+      <strong id="kpiProfessoresAtivos">0</strong>
+      <small>Profissionais em atividade</small>
+    </article>
+    <article class="card bi-kpi-card">
+      <div class="bi-kpi-card__top"><span>Agenda hoje</span><i aria-hidden="true"></i></div>
+      <strong id="kpiAgendaHoje">0</strong>
+      <small>Compromissos programados</small>
+    </article>
+    <article class="card bi-kpi-card bi-kpi-card--secondary">
+      <div class="bi-kpi-card__top"><span>Total de turmas</span><i aria-hidden="true"></i></div>
+      <strong id="kpiTotalTurmas">0</strong>
+      <small>Base completa cadastrada</small>
+    </article>
+    <article class="card bi-kpi-card bi-kpi-card--secondary">
+      <div class="bi-kpi-card__top"><span>Turmas encerradas</span><i aria-hidden="true"></i></div>
+      <strong id="kpiTurmasEncerradas">0</strong>
+      <small>Registros finalizados</small>
+    </article>
+    <article class="card bi-kpi-card bi-kpi-card--secondary">
+      <div class="bi-kpi-card__top"><span>Total de professores</span><i aria-hidden="true"></i></div>
+      <strong id="kpiTotalProfessores">0</strong>
+      <small>Profissionais cadastrados</small>
+    </article>
+    <article class="card bi-kpi-card bi-kpi-card--secondary">
+      <div class="bi-kpi-card__top"><span>Agenda do período</span><i aria-hidden="true"></i></div>
+      <strong id="kpiAgendaPeriodo">0</strong>
+      <small>Eventos no intervalo escolhido</small>
+    </article>
+  </section>
+
+  <section class="bi-dashboard-section" aria-labelledby="tituloDistribuicao">
+    <div class="bi-section-heading">
+      <div>
+        <span class="bi-eyebrow">Distribuição</span>
+        <h2 id="tituloDistribuicao">Composição da operação</h2>
+        <p>Comparativos proporcionais com leitura compacta e objetiva.</p>
+      </div>
+    </div>
+
+    <div class="bi-chart-grid">
+      <article class="card bi-chart-card">
+        <div class="bi-chart-card__header">
+          <div><h3>Alunos por modalidade</h3><p>Participação de cada modalidade na base ativa.</p></div>
+        </div>
+        <div class="bi-chart-frame"><canvas id="graficoTurmasModalidade"></canvas></div>
+      </article>
+
+      <article class="card bi-chart-card">
+        <div class="bi-chart-card__header">
+          <div><h3>Professores por especialidade</h3><p>Distribuição do quadro por área de atuação.</p></div>
+        </div>
+        <div class="bi-chart-frame"><canvas id="graficoProfessoresEspecialidade"></canvas></div>
+      </article>
+
+      <article class="card bi-chart-card">
+        <div class="bi-chart-card__header">
+          <div><h3>Agenda por tipo</h3><p>Composição dos compromissos registrados.</p></div>
+        </div>
+        <div class="bi-chart-frame"><canvas id="graficoAgendaTipo"></canvas></div>
+      </article>
+
+      <article class="card bi-chart-card">
+        <div class="bi-chart-card__header">
+          <div><h3>Agenda por mês</h3><p>Evolução mensal do volume de agendamentos.</p></div>
+        </div>
+        <div class="bi-chart-frame bi-chart-frame--bar"><canvas id="graficoAgendaMes"></canvas></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="bi-dashboard-section" aria-labelledby="tituloDesempenho">
+    <div class="bi-section-heading">
+      <div>
+        <span class="bi-eyebrow">Desempenho</span>
+        <h2 id="tituloDesempenho">Rankings e acompanhamento</h2>
+        <p>Listas operacionais para apoiar decisões de escala e capacidade.</p>
+      </div>
+    </div>
+
+    <div class="bi-table-grid">
+      <article class="card bi-table-card">
+        <div class="bi-table-card__header"><h3>Professores por turmas</h3><p>Quantidade de turmas vinculadas.</p></div>
+        <div id="rankingProfessoresTurmas" class="bi-table-content">Carregando...</div>
+      </article>
+
+      <article class="card bi-table-card">
+        <div class="bi-table-card__header"><h3>Professores por agenda</h3><p>Volume de agendamentos no período.</p></div>
+        <div id="rankingProfessoresAgenda" class="bi-table-content">Carregando...</div>
+      </article>
+
+      <article class="card bi-table-card">
+        <div class="bi-table-card__header"><h3>Agenda de hoje</h3><p>Compromissos programados para o dia.</p></div>
+        <div id="agendaHoje" class="bi-table-content">Carregando...</div>
+      </article>
+
+      <article class="card bi-table-card">
+        <div class="bi-table-card__header"><h3>Turmas sem professor</h3><p>Pendências que exigem vinculação.</p></div>
+        <div id="turmasSemProfessor" class="bi-table-content">Carregando...</div>
+      </article>
+    </div>
+  </section>
+
+  <section class="card bi-table-card bi-occupancy-card">
+    <div class="bi-table-card__header">
+      <div><span class="bi-eyebrow">Capacidade</span><h2>Ocupação das turmas</h2><p>Relação entre matrículas ativas e capacidade disponível.</p></div>
+    </div>
+    <div id="turmasOcupacao" class="bi-table-content">Carregando...</div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/js/bi-academia-operacional/index.js?v=20260730-profissional-1"></script>
+<script src="/assets/js/fusion-layout.js"></script>
+<script src="/assets/pwa/fusion-pwa-install.js" defer></script>
+<script src="/assets/js/fusion-mobile-final.js" defer></script>
+</body>
+</html>

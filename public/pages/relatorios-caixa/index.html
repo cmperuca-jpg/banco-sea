@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Relatório Diário de Caixa - Fusion Sistema</title>
+  
+  
+  <script src="/assets/js/fusion-auth.js"></script>
+  <script>FusionAuth.proteger();</script>
+  <meta name="fusion-existing-pages" content="access-engine,admin,agenda,aluno-avaliacao,aluno-login,aluno-treinos,alunos,avaliacoes,bi-academia,bi-academia-operacional,bi-financeiro,caixa,checkin,comercial,comercial-painel,configuracoes,dashboard,financeiro,matricula-online,matriculas,matriculas-pendentes,mensalidades,modalidades,natacao-professor,planos,professor-area,professor-login,professores,recebimentos,relatorios-caixa,treinos,turmas">
+
+<link rel="manifest" href="/manifest-sistema.webmanifest">
+<meta name="theme-color" content="#22b8d2">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="/assets/pwa/icons/fusion-icon-180.png">
+
+  <!-- Fusion Sistema: template global único -->
+  <link rel="stylesheet" href="/assets/css/fusion-app.css?v=20260730-template-unico-1">
+  <link rel="stylesheet" href="/assets/pwa/fusion-pwa-mobile.css">
+  <link rel="stylesheet" href="/assets/css/fusion-mobile-final.css">
+  <link rel="stylesheet" href="/assets/css/fusion-theme.css?v=20260730-template-unico-1">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="/assets/css/fusion-menu-global.css?v=20260730-template-unico-1">
+</head>
+<body>
+  <main>
+    <header class="topo">
+      <div>
+        <h2>Relatório Diário de Caixa</h2>
+        <p>Recebimentos, taxas, líquido, saídas e fechamento por período.</p>
+      </div>
+      <button id="btnImprimir">Imprimir</button>
+    </header>
+
+    <section class="card filtros">
+      <label>Data inicial
+        <input type="date" id="dataInicio">
+      </label>
+      <label>Data final
+        <input type="date" id="dataFim">
+      </label>
+      <label>Forma
+        <select id="formaPagamento">
+          <option value="">Todas</option>
+          <option>Dinheiro</option>
+          <option>PIX</option>
+          <option>Débito</option>
+          <option>Crédito</option>
+          <option>Boleto</option>
+        </select>
+      </label>
+      <label>Categoria
+        <input id="categoria" placeholder="Matrículas, Mensalidades...">
+      </label>
+      <button id="btnGerar">Gerar relatório</button>
+    </section>
+
+    <section class="grid-resumo" id="resumoCards"></section>
+
+    <section class="card">
+      <h3>Totais por forma de pagamento</h3>
+      <table>
+        <thead><tr><th>Forma</th><th>Qtd.</th><th>Bruto</th><th>Taxas</th><th>Líquido</th></tr></thead>
+        <tbody id="porForma"></tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h3>Recebimentos</h3>
+      <table>
+        <thead><tr><th>Hora</th><th>Cliente</th><th>Descrição</th><th>Categoria</th><th>Forma</th><th>Bruto</th><th>Taxa</th><th>Líquido</th></tr></thead>
+        <tbody id="recebimentos"></tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h3>Saídas / Pagamentos</h3>
+      <table>
+        <thead><tr><th>Hora</th><th>Pessoa</th><th>Descrição</th><th>Categoria</th><th>Forma</th><th>Valor</th></tr></thead>
+        <tbody id="pagamentos"></tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h3>Totais por categoria</h3>
+      <table>
+        <thead><tr><th>Categoria</th><th>Qtd.</th><th>Bruto</th><th>Taxas</th><th>Líquido</th></tr></thead>
+        <tbody id="porCategoria"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script type="module" src="./index.js?v=20260728-recibos-caixa-1"></script>
+    <script src="/assets/js/fusion-layout.js"></script>
+
+<script src="/assets/pwa/fusion-pwa-install.js" defer></script>
+  <script src="/assets/js/fusion-mobile-final.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fusion Sistema - Presenças</title>
+  
+  
+  <script src="/assets/js/fusion-auth.js"></script>
+  <script>FusionAuth.proteger();</script>
+  <meta name="fusion-existing-pages" content="agenda,alunos,avaliacoes,bi,bi-academia,bi-academia-operacional,bi-financeiro,caixa,checkin,configuracoes,dashboard,estoque,exercicios,financeiro,login,matriculas,mensalidades,modalidades,modelos-treino,pagamentos,planos,presencas,professores,recebimentos,relatorios-caixa,treinos,turmas">
+
+<link rel="manifest" href="/manifest-sistema.webmanifest">
+<meta name="theme-color" content="#22b8d2">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="/assets/pwa/icons/fusion-icon-180.png">
+
+  <!-- Fusion Sistema: template global único -->
+  <link rel="stylesheet" href="/assets/css/fusion-app.css?v=20260730-template-unico-1">
+  <link rel="stylesheet" href="/assets/pwa/fusion-pwa-mobile.css">
+  <link rel="stylesheet" href="/assets/css/fusion-theme.css?v=20260730-template-unico-1">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/assets/css/fusion-menu-global.css?v=20260730-template-unico-1">
+</head>
+<body>
+
+<main class="main">
+
+<section class="card">
+
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <div>
+      <h2>Check-in e Presença</h2>
+      <p>Controle entrada, saída e frequência dos alunos.</p>
+    </div>
+
+    <button type="button" onclick="window.location.href='/pages/checkin/index.html'">Novo Check-in</button>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <h3>Presentes hoje</h3>
+      <strong id="totalPresentesHoje">0</strong>
+    </div>
+
+    <div class="card">
+      <h3>Check-ins abertos</h3>
+      <strong id="totalAbertos">0</strong>
+    </div>
+
+    <div class="card">
+      <h3>Total registros</h3>
+      <strong id="totalRegistros">0</strong>
+    </div>
+  </div>
+
+  <br>
+
+  <div class="filtros">
+    <input id="filtroData" type="date">
+    <input id="filtroAluno" placeholder="Pesquisar aluno">
+    <input id="filtroTurma" placeholder="Pesquisar turma">
+
+    <select id="filtroStatus">
+      <option value="">Todos status</option>
+      <option value="presente">Presente</option>
+      <option value="saida">Saída registrada</option>
+      <option value="cancelado">Cancelado</option>
+    </select>
+
+    <button onclick="aplicarFiltros()">Pesquisar</button>
+    <button onclick="limparFiltros()">Limpar</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Aluno</th>
+        <th>Turma</th>
+        <th>Entrada</th>
+        <th>Saída</th>
+        <th>Status</th>
+        <th width="280">Ações</th>
+      </tr>
+    </thead>
+    <tbody id="tabelaPresencas"></tbody>
+  </table>
+
+</section>
+
+</main>
+<script src="/js/modal.js"></script>
+<script src="/js/presencas/index.js"></script>
+
+    <script src="/assets/js/fusion-layout.js"></script>
+
+<script src="/assets/pwa/fusion-pwa-install.js" defer></script>
+</body>
+</html>

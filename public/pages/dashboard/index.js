@@ -1,0 +1,148 @@
+const dadosFallback = { alunos: [], mensalidades: [], avaliacoes: [], lancamentos: [], resumo: {} };
+
+async function buscar(url, chave) {
+  try {
+    const resp = await (window.FusionAuth?.fetchAuth ? FusionAuth.fetchAuth(url, { cache: 'no-store' }) : fetch(url, { cache: 'no-store' }));
+    if (!resp.ok) return dadosFallback[chave] || [];
+    const json = await resp.json();
+    if (Array.isArray(json)) return json;
+    return json[chave] || json.dados || json.data || [];
+  } catch {
+    return dadosFallback[chave] || [];
+  }
+}
+
+async function buscarObjeto(url, chave = '') {
+  try {
+    const resp = await (window.FusionAuth?.fetchAuth ? FusionAuth.fetchAuth(url, { cache: 'no-store' }) : fetch(url, { cache: 'no-store' }));
+    if (!resp.ok) return {};
+    const json = await resp.json();
+    if (chave && json?.[chave] && typeof json[chave] === 'object') return json[chave];
+    if (json && !Array.isArray(json) && typeof json === 'object') return json;
+    return {};
+  } catch {
+    return {};
+  }
+}
+
+function moeda(v) {
+  return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
+}
+
+(async function carregarDashboard() {
+  const hoje = new Date();
+  const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString().slice(0, 10);
+  const hojeIso = hoje.toISOString().slice(0, 10);
+  const [alunos, mensalidadesResumo, avaliacoes, financeiroResumo] = await Promise.all([
+    buscar('/api/alunos', 'alunos'),
+    buscarObjeto('/api/mensalidades/resumo'),
+    buscar('/api/avaliacoes', 'avaliacoes'),
+    buscarObjeto(`/api/financeiro/relatorios/bi-financeiro?inicio=${inicioMes}&fim=${hojeIso}`, 'resumo')
+  ]);
+
+  const ativos = alunos.filter(a => String(a.status || 'ativo').toLowerCase() === 'ativo').length;
+  // A cobrança inicial unificada é uma entrada financeira, não uma segunda
+  // mensalidade recorrente. O backend já a exclui deste campo específico.
+  const abertas = mensalidadesResumo.recorrentesAbertas !== undefined
+    ? Number(mensalidadesResumo.recorrentesAbertas || 0)
+    : Number(mensalidadesResumo.abertas || 0) +
+      Number(mensalidadesResumo.atrasadas || 0) +
+      Number(mensalidadesResumo.parciais || 0);
+  const receita = Number(financeiroResumo.recebido || financeiroResumo.receitasLiquidasPagas || 0);
+
+  setText('kpiAlunos', ativos);
+  setText('kpiAbertas', abertas);
+  const idsAlunosValidos = new Set(
+    alunos
+      .map(a => String(a.id ?? a._id ?? a.alunoId ?? a.aluno_id ?? "").trim())
+      .filter(Boolean)
+  );
+
+  const avaliacoesValidas = avaliacoes.filter(avaliacao => {
+    const id = String(
+      avaliacao.alunoId ??
+      avaliacao.aluno_id ??
+      avaliacao.idAluno ??
+      ""
+    ).trim();
+    return Boolean(id && idsAlunosValidos.has(id));
+  });
+
+  setText('kpiAvaliacoes', avaliacoesValidas.length);
+  setText('kpiReceita', moeda(receita));
+})();
+
+
+(function configurarLiberacaoManualCatraca() {
+  const usuario = window.FusionAuth?.usuarioAtual?.() || null;
+  const perfil = String(usuario?.perfil || usuario?.perfilOriginal || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+  const perfilPermitido = perfil === "admin" || perfil.includes("administrador") || perfil.includes("recepc");
+  const card = document.getElementById("controleCatracaDashboard");
+  const botao = document.getElementById("btnLiberarCatracaDashboard");
+  const status = document.getElementById("statusLiberacaoCatraca");
+
+  if (!card || !botao || !status || !perfilPermitido) return;
+  card.style.display = "block";
+
+  botao.addEventListener("click", async () => {
+    if (botao.disabled) return;
+
+    const motivoInformado = window.prompt(
+      "Motivo da liberação:\n\n1 - Visitante\n2 - Aluno sem biometria\n3 - Manutenção\n4 - Outro",
+      "Visitante"
+    );
+
+    if (motivoInformado === null) return;
+    const motivo = String(motivoInformado || "Liberação manual").trim() || "Liberação manual";
+
+    botao.disabled = true;
+    botao.textContent = "Liberando...";
+    status.textContent = "Enviando comando para a catraca...";
+
+    try {
+      const fetchSeguro = window.FusionAuth?.fetchAuth
+        ? FusionAuth.fetchAuth.bind(FusionAuth)
+        : fetch.bind(window);
+
+      const resposta = await fetchSeguro("/api/access-engine/liberar-remoto", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          dispositivoId: "disp_henry7x_01",
+          direcao: "ambos",
+          tempoSegundos: 5,
+          origem: "dashboard-liberacao-manual",
+          operadorId: usuario?.id || "",
+          operadorNome: usuario?.nome || "Usuário do sistema",
+          operadorPerfil: usuario?.perfilOriginal || usuario?.perfil || "",
+          motivo
+        })
+      });
+
+      const json = await resposta.json().catch(() => ({}));
+      if (!resposta.ok || json.ok === false) {
+        throw new Error(json.mensagem || json.erro || "A catraca não confirmou a liberação.");
+      }
+
+      const agora = new Date().toLocaleString("pt-BR");
+      status.textContent = `Catraca liberada por 5 segundos às ${agora}. Motivo: ${motivo}.`;
+      alert("Catraca liberada com sucesso por 5 segundos.");
+    } catch (erro) {
+      console.error("Falha na liberação manual da catraca:", erro);
+      status.textContent = `Falha na liberação: ${erro?.message || "erro de comunicação"}.`;
+      alert(erro?.message || "Não foi possível liberar a catraca.");
+    } finally {
+      botao.disabled = false;
+      botao.textContent = "Liberar catraca";
+    }
+  });
+})();

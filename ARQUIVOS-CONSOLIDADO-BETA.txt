@@ -1,0 +1,22 @@
+FUSION SISTEMA 3.0.0 BETA 1 — PACOTE CONSOLIDADO
+
+Este pacote substitui as entregas separadas das etapas 1 a 4.
+
+Inclui:
+- autenticação Supabase;
+- sincronização incremental de alunos, professores e modalidades;
+- reconciliação automática diária, sem botão manual;
+- aplicativo desktop Electron;
+- inicialização com o Windows e funcionamento em bandeja;
+- dados persistentes fora da pasta do programa;
+- atualização automática por GitHub Releases;
+- workflow para gerar FusionSistema-Setup.exe;
+- página de instalação da PWA e download Windows;
+- migrations do novo Supabase.
+
+O cliente final recebe somente FusionSistema-Setup.exe ou instala a PWA.
+Ele não usa PowerShell, npm, ZIP, GitHub ou painel do Supabase.
+
+O instalador não está incluído neste ZIP porque precisa ser compilado em Windows.
+Ele é gerado automaticamente pelo GitHub Actions ou pelo arquivo
+GERAR-INSTALADOR-WINDOWS.bat no computador do desenvolvedor.

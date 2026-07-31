@@ -1,0 +1,42 @@
+{
+  "id": "/pages/portal-aluno/",
+  "name": "Fusion Sistema Aluno",
+  "short_name": "Fusion Aluno",
+  "description": "Fusion Sistema instalado como aplicativo PWA.",
+  "start_url": "/pages/portal-aluno/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui",
+    "browser"
+  ],
+  "background_color": "#111827",
+  "theme_color": "#16a34a",
+  "orientation": "portrait-primary",
+  "categories": [
+    "business",
+    "productivity"
+  ],
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/assets/pwa/icons/fusion-aluno-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/pwa/icons/fusion-aluno-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/pwa/icons/fusion-aluno-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

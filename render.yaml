@@ -1,0 +1,60 @@
+services:
+  - type: web
+    name: fusion-erp
+    env: node
+    plan: free
+    buildCommand: npm ci --omit=dev || npm install --omit=dev
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    disk:
+      name: fusion-erp-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: FUSION_PERSISTENT_DIR
+        value: /var/data/fusion
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: FUSION_DATABASE_PROVIDER
+        value: supabase
+      - key: FUSION_SUPABASE_RECORDS_TABLE
+        value: fusion_v3_records
+      - key: FUSION_PERSISTENCE_WRITE_MODE
+        value: primary
+      - key: FUSION_JSON_FALLBACK
+        value: false
+      - key: FUSION_MIGRATE_JSON_ON_START
+        sync: false
+      - key: SUPABASE_DATA_BUCKET
+        value: fusion-data
+      - key: FUSION_TENANT_ID
+        value: academia-piloto
+      - key: FUSION_DATA_SYNC_MS
+        value: 5000
+      - key: FUSION_REQUIRE_SUPABASE_DATA
+        value: true
+      - key: SUPABASE_BACKUP_BUCKET
+        value: fusion-backups
+      - key: FUSION_BACKUP_AUTO
+        value: true
+      - key: FUSION_BACKUP_AUTO_MS
+        value: 21600000
+      - key: FUSION_BACKUP_PART_MB
+        value: 40
+      - key: FUSION_BACKUP_RESTORE_MAX_MB
+        value: 250
+      - key: ACCESS_AGENT_ID
+        value: academia-01
+      - key: ACCESS_AGENT_TOKEN
+        sync: false
+      - key: ACCESS_COMMAND_API_KEY
+        sync: false
