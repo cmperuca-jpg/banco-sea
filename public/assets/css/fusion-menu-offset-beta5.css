@@ -1,0 +1,152 @@
+/*
+ * Fusion Sistema 3.0.0-beta.5
+ * Correção global de conteúdo encoberto pelo menu superior.
+ *
+ * Algumas páginas antigas posicionavam ações e cabeçalhos em relação à antiga
+ * barra lateral. Esta camada é carregada por último e restaura o fluxo normal.
+ */
+
+:root{
+  --fusion-top-menu-height:52px;
+  --fusion-page-top-gap:28px;
+}
+
+html.fusion-menu-superior-ativo,
+body.fusion-menu-superior-ativo{
+  scroll-padding-top:calc(var(--fusion-top-menu-height) + 16px)!important;
+}
+
+/* A barra permanece no fluxo da página e fixa somente durante a rolagem. */
+body.fusion-menu-superior-ativo > #fusionTopMenu{
+  position:sticky!important;
+  inset:auto!important;
+  top:0!important;
+  margin:0!important;
+  transform:none!important;
+}
+
+/*
+ * O primeiro contêiner visual depois do menu sempre começa abaixo dele.
+ * O seletor direto evita mexer em modais e componentes internos.
+ */
+body.fusion-menu-superior-ativo > #fusionTopMenu + :is(
+  main,
+  .main,
+  .content,
+  .conteudo,
+  .container,
+  .wrapper,
+  .page,
+  .page-content,
+  .main-content,
+  .fusion-main,
+  .fusion-shell,
+  .page-root,
+  .app-root,
+  .crm,
+  .chat-admin
+){
+  position:relative!important;
+  inset:auto!important;
+  top:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  left:auto!important;
+  z-index:auto!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-height:calc(100vh - var(--fusion-top-menu-height))!important;
+  margin-top:0!important;
+  transform:none!important;
+  padding-top:var(--fusion-page-top-gap)!important;
+}
+
+/* Ações e cabeçalhos antigos não podem permanecer presos atrás da barra. */
+body.fusion-menu-superior-ativo :is(
+  .page-actions,
+  .top-actions,
+  .header-actions,
+  .toolbar,
+  .actions,
+  .acoes,
+  .botoes,
+  .buttons,
+  .page-header,
+  .topbar,
+  .cabecalho,
+  .topo
+){
+  top:auto!important;
+  right:auto!important;
+  left:auto!important;
+  transform:none!important;
+  scroll-margin-top:calc(var(--fusion-top-menu-height) + 16px)!important;
+}
+
+/* Primeira faixa da página: sem margem negativa herdada. */
+body.fusion-menu-superior-ativo > #fusionTopMenu + :is(
+  main,
+  .main,
+  .content,
+  .conteudo,
+  .container,
+  .wrapper,
+  .page,
+  .page-content,
+  .main-content,
+  .fusion-main,
+  .fusion-shell,
+  .page-root,
+  .app-root,
+  .crm,
+  .chat-admin
+) > :first-child{
+  margin-top:0!important;
+  transform:none!important;
+}
+
+/* Garante que os botões da faixa inicial apareçam por inteiro. */
+body.fusion-menu-superior-ativo .page-actions{
+  position:relative!important;
+  min-height:44px;
+  overflow:visible!important;
+}
+
+/* Modais continuam sobre o menu. */
+body.fusion-menu-superior-ativo :is(
+  .modal,
+  .modal-backdrop,
+  .modal-overlay,
+  .popup,
+  .dialog,
+  [role="dialog"]
+){
+  scroll-margin-top:0!important;
+}
+
+@media(max-width:900px){
+  :root{
+    --fusion-top-menu-height:50px;
+    --fusion-page-top-gap:18px;
+  }
+
+  body.fusion-menu-superior-ativo > #fusionTopMenu + :is(
+    main,
+    .main,
+    .content,
+    .conteudo,
+    .container,
+    .wrapper,
+    .page,
+    .page-content,
+    .main-content,
+    .fusion-main,
+    .fusion-shell,
+    .page-root,
+    .app-root,
+    .crm,
+    .chat-admin
+  ){
+    padding-top:var(--fusion-page-top-gap)!important;
+  }
+}

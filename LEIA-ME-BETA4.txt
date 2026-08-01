@@ -1,0 +1,30 @@
+﻿FUSION SISTEMA — CORREÇÃO VISUAL 3.0.0-BETA.4
+
+Problema corrigido:
+- fusion-layout.js ainda criava a antiga barra lateral;
+- fusion-menu-global.css ocultava essa barra e esperava #fusionTopMenu;
+- as regras do Dashboard dependiam da classe fusion-menu-superior-ativo;
+- por isso os dados apareciam, mas menu, cartões e grade não.
+
+Aplicação:
+1. Extraia este ZIP dentro da raiz atual:
+   C:\Users\academia01\Documents\GitHub\banco sea
+2. Confirme a substituição/adição dos arquivos.
+3. Execute:
+   APLICAR-CORRECAO-VISUAL-BETA4.bat
+
+O processo:
+- fecha o Fusion aberto;
+- adiciona o menu superior compatível com o CSS existente;
+- atualiza todas as páginas que carregam fusion-layout.js;
+- muda a versão para 3.0.0-beta.4;
+- corrige o repositório de atualização para cmperuca-jpg/banco-sea;
+- gera e valida o novo instalador;
+- abre o instalador.
+
+Não altera:
+- .env;
+- data;
+- uploads;
+- credenciais;
+- registros no Supabase.

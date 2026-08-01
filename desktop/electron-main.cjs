@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, Tray, nativeImage, shell, Notification, dialog } = require("electron");
+const { app, BrowserWindow, Menu, Tray, nativeImage, shell, Notification, dialog, session } = require("electron");
 const { autoUpdater } = require("electron-updater");
 const path = require("node:path");
 const fs = require("node:fs");
@@ -14,6 +14,8 @@ let janela = null;
 let tray = null;
 let encerrando = false;
 let moduloServidor = null;
+const paginasRecarregadasSemCache = new Set();
+const paginasAvisadas = new Set();
 
 function copiarDiretorioSeVazio(origem, destino) {
   fs.mkdirSync(destino, { recursive: true });
@@ -95,6 +97,23 @@ function prepararRuntime() {
   return { runtimeRoot, config };
 }
 
+async function limparCacheDaInterface() {
+  const sessao = session.defaultSession;
+  const operacoes = [
+    sessao.clearCache(),
+    sessao.clearStorageData({
+      origin: URL_LOCAL,
+      storages: ["serviceworkers", "cachestorage", "shadercache"]
+    })
+  ];
+  const resultados = await Promise.allSettled(operacoes);
+  resultados.forEach(resultado => {
+    if (resultado.status === "rejected") {
+      console.warn(`[Desktop] Não foi possível limpar parte do cache visual: ${resultado.reason?.message || resultado.reason}`);
+    }
+  });
+}
+
 async function validarRecursoWeb(caminho, tipoEsperado) {
   const resposta = await fetch(`${URL_LOCAL}${caminho}`, {
     cache: "no-store",
@@ -118,7 +137,9 @@ async function aguardarServidor(tentativas = 80) {
       });
       if (resposta.ok) {
         await validarRecursoWeb("/pages/login/index.html", "text/html");
+        await validarRecursoWeb("/pages/dashboard/index.html", "text/html");
         await validarRecursoWeb("/assets/css/fusion-app.css", "text/css");
+        await validarRecursoWeb("/assets/css/fusion-theme.css", "text/css");
         await validarRecursoWeb("/assets/css/fusion-menu-global.css", "text/css");
         await validarRecursoWeb("/assets/js/fusion-layout.js", "javascript");
         return true;
@@ -135,6 +156,46 @@ async function iniciarServidor() {
   const arquivoServidor = path.join(__dirname, "..", "server.mjs");
   moduloServidor = await import(pathToFileURL(arquivoServidor).href);
   await aguardarServidor();
+}
+
+async function validarInterfaceRenderizada() {
+  if (!janela || janela.isDestroyed()) return;
+  const resultado = await janela.webContents.executeJavaScript(`
+    (() => {
+      const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
+      return {
+        pagina: location.pathname,
+        total: links.length,
+        falhas: links
+          .filter(link => !link.sheet)
+          .map(link => link.getAttribute('href') || link.href)
+      };
+    })()
+  `, true).catch(erro => ({ erro: erro.message }));
+
+  if (resultado?.erro) {
+    console.warn(`[Desktop] Falha ao validar a interface: ${resultado.erro}`);
+    return;
+  }
+  if (!resultado?.falhas?.length) return;
+
+  const pagina = resultado.pagina || janela.webContents.getURL();
+  if (!paginasRecarregadasSemCache.has(pagina)) {
+    paginasRecarregadasSemCache.add(pagina);
+    console.warn(`[Desktop] CSS não carregado em ${pagina}. Recarregando sem cache: ${resultado.falhas.join(", ")}`);
+    janela.webContents.reloadIgnoringCache();
+    return;
+  }
+
+  if (!paginasAvisadas.has(pagina)) {
+    paginasAvisadas.add(pagina);
+    await dialog.showMessageBox(janela, {
+      type: "warning",
+      title: "Fusion Sistema",
+      message: "Alguns arquivos visuais não foram carregados.",
+      detail: `Página: ${pagina}\nArquivos: ${resultado.falhas.join(", ")}`
+    });
+  }
 }
 
 function criarJanela() {
@@ -174,6 +235,12 @@ function criarJanela() {
     }
   });
 
+  janela.webContents.on("did-finish-load", () => {
+    validarInterfaceRenderizada().catch(erro => {
+      console.warn(`[Desktop] Falha ao verificar estilos no renderer: ${erro.message}`);
+    });
+  });
+
   janela.on("close", evento => {
     if (!encerrando) {
       evento.preventDefault();
@@ -185,7 +252,10 @@ function criarJanela() {
     if (!process.argv.includes("--background")) janela.show();
   });
 
-  janela.loadURL(`${URL_LOCAL}/pages/login/index.html`);
+  const versao = encodeURIComponent(app.getVersion());
+  void janela.loadURL(`${URL_LOCAL}/pages/login/index.html?desktop=${versao}`, {
+    extraHeaders: "pragma: no-cache\ncache-control: no-cache\n"
+  });
   return janela;
 }
 
@@ -244,6 +314,7 @@ if (!bloqueio) {
     try {
       app.setAppUserModelId("com.fusionsistema.desktop");
       prepararRuntime();
+      await limparCacheDaInterface();
       await iniciarServidor();
       criarTray();
       criarJanela();

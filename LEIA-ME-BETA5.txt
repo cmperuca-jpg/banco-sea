@@ -1,0 +1,17 @@
+﻿FUSION SISTEMA 3.0.0-BETA.5
+
+Correção:
+- impede que ações, cabeçalhos e primeiras seções fiquem atrás do menu superior;
+- restaura top, transform e margem de páginas antigas;
+- adiciona espaçamento global abaixo da barra;
+- preserva modais e comportamento responsivo;
+- atualiza o verificador para a versão beta5.
+
+Aplicação:
+1. Extraia na raiz:
+   C:\Users\academia01\Documents\GitHub\banco sea
+2. Confirme a substituição/adição.
+3. Execute:
+   APLICAR-ESPACAMENTO-MENU-BETA5.bat
+
+Não altera .env, data, uploads ou Supabase.

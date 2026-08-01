@@ -1,0 +1,20 @@
+FUSION SISTEMA 3.0.0-beta.3 — CORREÇÃO DESKTOP
+
+Esta correção foi preparada após a inspeção do repositório cmperuca-jpg/banco-sea.
+
+Problemas tratados:
+- cache HTTP persistente do Electron;
+- Service Worker da PWA registrado dentro do aplicativo desktop;
+- reinstalação abrindo o processo antigo que permanecia na bandeja;
+- validação incompleta dos arquivos visuais;
+- atualização automática apontando para o repositório antigo fusion-erp.
+
+COMO APLICAR
+1. Extraia este ZIP em:
+   C:\Users\academia01\Documents\GitHub\fusion-erp (3)\fusion-erp
+2. Confirme a substituição dos arquivos.
+3. Execute CORRIGIR-GERAR-INSTALAR-BETA3.bat.
+4. O processo fecha a versão antiga, gera o instalador, valida os recursos e abre a instalação.
+
+DADOS PRESERVADOS
+A correção não apaga o .env, os JSON locais, uploads, sessão de login ou dados do Supabase.

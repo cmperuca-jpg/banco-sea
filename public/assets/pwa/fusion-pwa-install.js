@@ -1,4 +1,14 @@
 (() => {
+  const emAplicativoDesktop = Boolean(window.FusionDesktop?.desktop);
+  if (emAplicativoDesktop) {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.getRegistrations()
+        .then(registros => Promise.all(registros.map(registro => registro.unregister())))
+        .catch(() => {});
+    }
+    return;
+  }
+
   const path = location.pathname.replace(/\/index\.html$/, "/");
   const standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent || "");
