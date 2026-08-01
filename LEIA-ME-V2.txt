@@ -1,0 +1,32 @@
+﻿SNAPSHOT PARA CORREÇÃO INTEGRAL — V2
+
+Esta versão corrige o bloqueio causado pela pasta logs.
+
+Ela NÃO depende do .gitignore. As exclusões são aplicadas localmente em:
+.git\info\exclude
+
+Nunca são enviados:
+- .env e variações privadas
+- data
+- uploads
+- release
+- node_modules
+- backups
+- logs
+- tmp/temp
+- .fusion-runtime
+- render-environment.txt
+
+Arquivos .env.example continuam permitidos.
+
+Aplicação:
+1. Extraia estes arquivos dentro de:
+   C:\Users\academia01\Documents\GitHub\banco sea
+2. Execute:
+   ENVIAR-SNAPSHOT-CORRECAO-INTEGRAL-V2.bat
+3. Aguarde:
+   SNAPSHOT ENVIADO COM SUCESSO
+4. Informe na conversa:
+   branch correcao-integral enviada
+
+A branch main não é alterada.

@@ -1,17 +1,34 @@
-FUSION ERP - UNIFICAÇÃO DO DASHBOARD COM O BI
+﻿SNAPSHOT PARA CORREÇÃO INTEGRAL
 
-Arquivo alterado:
-  public/js/dashboard-home.js
+Objetivo:
+Enviar o código EXATO da pasta atual para uma branch isolada, sem alterar a main.
 
-O que muda:
-- Alunos ativos, total de alunos, matrículas ativas e presentes hoje passam a vir de /api/bi/executivo.
-- O Dashboard deixa de recalcular alunos ativos usando diretamente aluno.status.
-- Os gráficos de plano e status passam a usar os dados consolidados do BI.
-- Aniversariantes e últimas avaliações continuam usando os cadastros originais.
-- Nenhuma rotina financeira é alterada.
+Como usar:
+1. Extraia os dois arquivos dentro de:
+   C:\Users\academia01\Documents\GitHub\banco sea
+2. Execute:
+   ENVIAR-SNAPSHOT-CORRECAO-INTEGRAL.bat
+3. Ao terminar, informe na conversa:
+   branch correcao-integral enviada
 
-Instalação:
-1. Extraia este ZIP na raiz do projeto.
-2. Permita substituir public/js/dashboard-home.js.
-3. Faça commit e deploy.
-4. Atualize o navegador com Ctrl+F5.
+Proteções:
+- não envia .env;
+- não envia data;
+- não envia uploads;
+- não envia release;
+- não envia node_modules;
+- não envia backups ou logs;
+- não altera a branch main.
+
+Depois do snapshot, a correção será trabalhada em uma branch/PR e testada em Windows com:
+- build do instalador;
+- inicialização do aplicativo;
+- health check do servidor;
+- autenticação de teste sem expor senha real;
+- abertura automática de todas as páginas do menu;
+- medição de sobreposição entre menu e conteúdo;
+- captura de screenshots;
+- teste da página Instalar e do botão Voltar;
+- relatório e artefatos do GitHub Actions.
+
+Nenhum novo instalador será tratado como validado sem esses testes.
