@@ -9,9 +9,12 @@
   <link rel="icon" href="/assets/pwa/icons/fusion-sistema-192.png">
   <link rel="stylesheet" href="/assets/css/fusion-app.css">
   <link rel="stylesheet" href="/assets/css/fusion-theme.css">
+  <link rel="stylesheet" href="/assets/css/fusion-menu-global.css">
+  <link rel="stylesheet" href="/assets/css/fusion-menu-offset-beta5.css?v=20260801-integral-1">
+  <script src="/assets/js/fusion-auth.js"></script>
   <style>
     body{margin:0;background:#eef4f7;color:#15384b;font-family:Arial,Helvetica,sans-serif}
-    .install-page{width:min(1080px,calc(100% - 32px));margin:0 auto;padding:38px 0 60px}
+    .install-page{width:min(1080px,calc(100% - 32px));margin:0 auto;padding:28px 0 60px}
     .install-hero,.install-card{border:1px solid #d8e2ea;border-radius:18px;background:#fff;box-shadow:0 10px 30px rgba(15,40,55,.08)}
     .install-hero{display:grid;grid-template-columns:1fr auto;gap:28px;align-items:center;padding:32px}
     .install-logo{width:82px;height:82px}
@@ -30,6 +33,10 @@
 </head>
 <body>
   <main class="install-page">
+    <div class="fusion-install-navigation" data-fusion-voltar-sistema>
+      <button class="fusion-install-back" id="btnVoltarSistema" type="button">← Voltar ao sistema</button>
+    </div>
+
     <section class="install-hero">
       <div>
         <span style="color:#118ca3;font-size:12px;font-weight:900;letter-spacing:.12em">FUSION SISTEMA</span>
@@ -64,7 +71,7 @@
           <li>Entre com e-mail e senha.</li>
         </ol>
         <div class="install-actions">
-          <a class="install-btn" href="https://github.com/cmperuca-jpg/fusion-erp/releases/latest/download/FusionSistema-Setup.exe">Baixar para Windows</a>
+          <a class="install-btn" href="https://github.com/cmperuca-jpg/banco-sea/releases/latest/download/FusionSistema-Setup.exe">Baixar para Windows</a>
         </div>
         <div class="status">O cliente final não precisa instalar Node.js nem configurar o Supabase.</div>
       </article>
@@ -72,7 +79,19 @@
   </main>
 
   <script src="/assets/pwa/fusion-pwa-install.js" defer></script>
+  <script src="/assets/js/fusion-top-menu-beta5.js?v=20260801-integral-1"></script>
   <script>
+    const voltarSistema = document.getElementById('btnVoltarSistema');
+    voltarSistema.addEventListener('click', () => {
+      try {
+        if (document.referrer && new URL(document.referrer).origin === location.origin) {
+          history.back();
+          return;
+        }
+      } catch {}
+      location.href = '/pages/dashboard/index.html';
+    });
+
     let eventoInstalacao = null;
     const botao = document.getElementById('btnInstalarPwa');
     const status = document.getElementById('pwaStatus');

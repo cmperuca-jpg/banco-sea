@@ -1,6 +1,6 @@
 {
   "name": "fusion-sistema",
-  "version": "3.0.0-beta.5",
+  "version": "3.0.0-beta.7",
   "description": "Fusion Sistema — aplicação local, PWA e sincronização Supabase",
   "private": true,
   "type": "module",
@@ -25,6 +25,7 @@
     "test:financeiro": "node scripts/test-financeiro-ledger.mjs",
     "test:localhost": "node scripts/test-localhost-financeiro.mjs",
     "test:cobranca-automatica": "node scripts/test-cobranca-automatica-http.mjs",
+    "test:e2e:desktop": "node tests/e2e-desktop-integral.mjs",
     "reconciliar:financeiro:simular": "node scripts/reconciliar-financeiro-caixa.mjs --supabase",
     "reconciliar:financeiro": "node scripts/reconciliar-financeiro-caixa.mjs --supabase --apply",
     "piloto:280": "npm run check && npm run backup:data",
@@ -88,20 +89,6 @@
       {
         "from": "public",
         "to": "public",
-        "filter": [
-          "**/*"
-        ]
-      },
-      {
-        "from": "data",
-        "to": "seed/data",
-        "filter": [
-          "**/*"
-        ]
-      },
-      {
-        "from": "uploads",
-        "to": "seed/uploads",
         "filter": [
           "**/*"
         ]

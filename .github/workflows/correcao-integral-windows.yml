@@ -1,0 +1,71 @@
+name: Correcao integral Windows
+
+on:
+  push:
+    branches:
+      - correcao-integral
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  teste-integral:
+    runs-on: windows-latest
+    timeout-minutes: 50
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+      ELECTRON_DISABLE_SECURITY_WARNINGS: "true"
+
+    steps:
+      - name: Baixar codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Validar projeto
+        run: npm run check
+
+      - name: Gerar instalador Windows
+        run: npm run desktop:dist
+
+      - name: Validar distribuicao
+        run: npm run desktop:verify-dist
+
+      - name: Instalar Playwright para o teste
+        run: npm install --no-save playwright
+
+      - name: Executar teste integral no aplicativo empacotado
+        run: npm run test:e2e:desktop
+
+      - name: Publicar relatorio e capturas
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-correcao-integral
+          path: |
+            artifacts/e2e-integral/**
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Publicar instalador aprovado
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: FusionSistema-Windows-Testado
+          path: |
+            release/FusionSistema-Setup.exe
+            release/FusionSistema-Setup.exe.blockmap
+            release/latest.yml
+          if-no-files-found: error
+          retention-days: 14

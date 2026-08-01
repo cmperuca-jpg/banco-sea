@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const MARCADOR = "__FUSION_TOP_MENU_BETA5__";
+  const MARCADOR = "__FUSION_NAVEGACAO_INTEGRAL_V1__";
   if (window[MARCADOR]) return;
   window[MARCADOR] = true;
 
@@ -15,8 +15,7 @@
     "/pages/avaliacoes/",
     "/pages/promocao/",
     "/pages/matricula-online/",
-    "/pages/login/",
-    "/pages/reconhecimento-facial/"
+    "/pages/login/"
   ];
 
   const GRUPOS = [
@@ -80,11 +79,34 @@
     }
   ];
 
+  const SELETOR_RAIZ = [
+    "main",
+    ".main",
+    ".content",
+    ".conteudo",
+    ".container",
+    ".wrapper",
+    ".page",
+    ".page-content",
+    ".main-content",
+    ".fusion-main",
+    ".fusion-shell",
+    ".page-root",
+    ".app-root",
+    ".crm",
+    ".chat-admin"
+  ].join(",");
+
+  let menuObserver = null;
+  let mutationObserver = null;
+  let correcaoAgendada = false;
+
   function caminhoNormalizado(valor = location.pathname) {
     const caminho = String(valor || "/").split("?")[0].split("#")[0];
-    return caminho.endsWith("/index.html")
-      ? caminho.slice(0, -"/index.html".length + 1)
-      : (caminho.endsWith("/") ? caminho : `${caminho}/`);
+    if (caminho.endsWith("/index.html")) {
+      return caminho.slice(0, -"/index.html".length + 1);
+    }
+    return caminho.endsWith("/") ? caminho : `${caminho}/`;
   }
 
   function paginaSemMenu() {
@@ -112,6 +134,7 @@
   }
 
   function podeVer(item) {
+    if (!item.perm) return true;
     try {
       if (window.FusionAuth?.temPermissao) {
         return window.FusionAuth.temPermissao([item.perm, item.id]);
@@ -125,17 +148,60 @@
     const permissoes = Array.isArray(user?.permissoes)
       ? user.permissoes.map(normalizar)
       : [];
-    return permissoes.includes("*") || permissoes.includes(normalizar(item.perm)) || permissoes.includes(normalizar(item.id));
+    return permissoes.includes("*")
+      || permissoes.includes(normalizar(item.perm))
+      || permissoes.includes(normalizar(item.id));
+  }
+
+  function gruposVisiveis() {
+    const usuario = usuarioAtual();
+    if (!usuario) {
+      return [{
+        nome: "Acesso",
+        itens: [
+          { id: "login", label: "Entrar no sistema", href: "/pages/login/index.html", perm: "" },
+          { id: "dashboard", label: "Voltar ao sistema", href: "/pages/dashboard/index.html", perm: "" }
+        ]
+      }];
+    }
+
+    return GRUPOS
+      .map(grupo => ({ ...grupo, itens: grupo.itens.filter(podeVer) }))
+      .filter(grupo => grupo.itens.length > 0);
   }
 
   function itemAtivo(item) {
     return caminhoNormalizado(item.href) === caminhoNormalizado();
   }
 
-  function gruposVisiveis() {
-    return GRUPOS
-      .map(grupo => ({ ...grupo, itens: grupo.itens.filter(podeVer) }))
-      .filter(grupo => grupo.itens.length > 0);
+  function elementoVisivel(elemento) {
+    if (!(elemento instanceof Element)) return false;
+    const estilo = getComputedStyle(elemento);
+    if (estilo.display === "none" || estilo.visibility === "hidden" || Number(estilo.opacity) === 0) return false;
+    const retangulo = elemento.getBoundingClientRect();
+    return retangulo.width > 0 && retangulo.height > 0;
+  }
+
+  function removerLayoutAntigo() {
+    document.querySelectorAll(
+      "#fusionSidebar,#fusionMenuGlobal,.fusion-menu-global,"
+      + ".fusion-v3-menu-toggle,.fusion-v3-menu-backdrop,"
+      + ".fusion-mobile-final-bar,.fusion-mobile-final-overlay,.fusion-breadcrumb"
+    ).forEach(el => el.remove());
+
+    document.documentElement.classList.remove("fusion-sem-menu", "fusion-com-sidebar", "fusion-menu-open");
+    document.body?.classList.remove("fusion-sem-menu", "fusion-com-sidebar", "fusion-menu-open");
+  }
+
+  function fecharMenus() {
+    document.querySelectorAll(".fusion-top-menu__group.is-open").forEach(el => {
+      el.classList.remove("is-open");
+      el.querySelector(":scope > .fusion-top-menu__group-trigger")?.setAttribute("aria-expanded", "false");
+    });
+    const mega = document.querySelector("#fusionTopMenu .fusion-top-menu__mega");
+    const gatilho = document.querySelector("#fusionTopMenu .fusion-top-menu__all-trigger");
+    mega?.classList.remove("is-open");
+    gatilho?.setAttribute("aria-expanded", "false");
   }
 
   function criarLink(item) {
@@ -160,25 +226,6 @@
     return link;
   }
 
-  function fecharMenus() {
-    document.querySelectorAll(".fusion-top-menu__group.is-open").forEach(el => el.classList.remove("is-open"));
-    const mega = document.querySelector("#fusionTopMenu .fusion-top-menu__mega");
-    const gatilho = document.querySelector("#fusionTopMenu .fusion-top-menu__all-trigger");
-    mega?.classList.remove("is-open");
-    gatilho?.setAttribute("aria-expanded", "false");
-  }
-
-  function removerLayoutAntigo() {
-    document.querySelectorAll(
-      "#fusionSidebar,#fusionMenuGlobal,.fusion-menu-global," +
-      ".fusion-v3-menu-toggle,.fusion-v3-menu-backdrop," +
-      ".fusion-mobile-final-bar,.fusion-mobile-final-overlay,.fusion-breadcrumb"
-    ).forEach(el => el.remove());
-
-    document.documentElement.classList.remove("fusion-sem-menu", "fusion-com-sidebar", "fusion-menu-open");
-    document.body?.classList.remove("fusion-sem-menu", "fusion-com-sidebar", "fusion-menu-open");
-  }
-
   function criarMegaMenu(grupos) {
     const mega = document.createElement("div");
     mega.className = "fusion-top-menu__mega";
@@ -188,10 +235,9 @@
     grade.className = "fusion-top-menu__mega-grid";
 
     grupos.forEach(grupo => {
-      const atual = grupo.itens.some(itemAtivo);
       const secao = document.createElement("section");
       secao.className = "fusion-top-menu__mega-group";
-      if (atual) secao.classList.add("is-current", "is-open");
+      if (grupo.itens.some(itemAtivo)) secao.classList.add("is-current", "is-open");
 
       const titulo = document.createElement("button");
       titulo.type = "button";
@@ -214,11 +260,131 @@
     return mega;
   }
 
-  function criarMenuSuperior() {
+  function encontrarRaiz() {
+    document.querySelectorAll(".fusion-page-root-integral").forEach(el => {
+      el.classList.remove("fusion-page-root-integral");
+      if (el.dataset.fusionPaddingTopOriginal) {
+        el.style.removeProperty("padding-top");
+        delete el.dataset.fusionPaddingTopOriginal;
+      }
+    });
+
+    const direta = Array.from(document.body.children).find(elemento => {
+      if (!(elemento instanceof HTMLElement)) return false;
+      if (elemento.id === "fusionTopMenu" || elemento.id === "fusionTopMenuSpacer") return false;
+      if (["SCRIPT", "STYLE", "LINK", "TEMPLATE"].includes(elemento.tagName)) return false;
+      if (elemento.matches(".modal,.modal-backdrop,.modal-overlay,.popup,.dialog,[role='dialog'],.fusion-pwa-banner,.fusion-ios-hint")) return false;
+      return elementoVisivel(elemento);
+    });
+
+    const raiz = direta || document.querySelector(SELETOR_RAIZ);
+    raiz?.classList.add("fusion-page-root-integral");
+    return raiz || null;
+  }
+
+  function sincronizarAlturaMenu() {
+    const menu = document.getElementById("fusionTopMenu");
+    const spacer = document.getElementById("fusionTopMenuSpacer");
+    if (!menu || !spacer) return;
+
+    const altura = Math.max(48, Math.ceil(menu.getBoundingClientRect().height || 52));
+    document.documentElement.style.setProperty("--fusion-menu-integral-height", `${altura}px`);
+    document.body.style.setProperty("--fusion-menu-integral-height", `${altura}px`);
+    spacer.style.setProperty("height", `${altura}px`, "important");
+  }
+
+  function candidatosDaRaiz(raiz) {
+    if (!raiz) return [];
+    const seletor = [
+      "h1", "h2", "h3",
+      "button", "a", "input", "select", "textarea",
+      ".page-actions", ".top-actions", ".header-actions",
+      ".page-header", ".topo", ".toolbar",
+      ".fusion-card", ".card", ".panel", ".kpi-grid"
+    ].join(",");
+
+    const elementos = [raiz, ...Array.from(raiz.querySelectorAll(seletor))];
+    return elementos.filter(elemento => {
+      if (!elementoVisivel(elemento)) return false;
+      if (elemento.closest("#fusionTopMenu")) return false;
+      if (elemento.closest(".modal,.modal-backdrop,.modal-overlay,.popup,.dialog,[role='dialog']")) return false;
+      const estilo = getComputedStyle(elemento);
+      return !["fixed"].includes(estilo.position);
+    });
+  }
+
+  function corrigirSobreposicao() {
+    correcaoAgendada = false;
+    const menu = document.getElementById("fusionTopMenu");
+    if (!menu) return;
+
+    sincronizarAlturaMenu();
+    const raiz = document.querySelector(".fusion-page-root-integral") || encontrarRaiz();
+    if (!raiz) return;
+
+    if (!raiz.dataset.fusionPaddingTopOriginal) {
+      raiz.dataset.fusionPaddingTopOriginal = String(parseFloat(getComputedStyle(raiz).paddingTop) || 0);
+    }
+
+    const original = Number(raiz.dataset.fusionPaddingTopOriginal || 0);
+    raiz.style.setProperty("padding-top", `${original}px`, "important");
+
+    const limite = menu.getBoundingClientRect().bottom + 8;
+    const candidatos = candidatosDaRaiz(raiz);
+    const topMinimo = candidatos.reduce((menor, elemento) => {
+      const retangulo = elemento.getBoundingClientRect();
+      if (retangulo.bottom <= 0) return menor;
+      return Math.min(menor, retangulo.top);
+    }, Number.POSITIVE_INFINITY);
+
+    if (Number.isFinite(topMinimo) && topMinimo < limite) {
+      const deslocamento = Math.ceil(limite - topMinimo);
+      raiz.style.setProperty("padding-top", `${original + deslocamento}px`, "important");
+      raiz.dataset.fusionOverlapCorrigido = String(deslocamento);
+    } else {
+      delete raiz.dataset.fusionOverlapCorrigido;
+    }
+  }
+
+  function agendarCorrecao() {
+    if (correcaoAgendada) return;
+    correcaoAgendada = true;
+    requestAnimationFrame(() => requestAnimationFrame(corrigirSobreposicao));
+  }
+
+  function garantirRetornoInstalacao() {
+    if (!location.pathname.includes("/pages/instalar/")) return;
+    const pagina = document.querySelector(".install-page,main");
+    if (!pagina || pagina.querySelector("[data-fusion-voltar-sistema]")) return;
+
+    const barra = document.createElement("div");
+    barra.className = "fusion-install-navigation";
+    barra.dataset.fusionVoltarSistema = "true";
+
+    const voltar = document.createElement("button");
+    voltar.type = "button";
+    voltar.className = "fusion-install-back";
+    voltar.textContent = "← Voltar ao sistema";
+    voltar.addEventListener("click", () => {
+      try {
+        if (document.referrer && new URL(document.referrer).origin === location.origin) {
+          history.back();
+          return;
+        }
+      } catch {}
+      location.href = "/pages/dashboard/index.html";
+    });
+
+    barra.appendChild(voltar);
+    pagina.prepend(barra);
+  }
+
+  function montarMenu() {
     if (!document.body || paginaSemMenu()) return;
 
     removerLayoutAntigo();
     document.querySelector("#fusionTopMenu")?.remove();
+    document.querySelector("#fusionTopMenuSpacer")?.remove();
 
     document.documentElement.classList.add("fusion-menu-superior-ativo", "fusion-layout-fullwidth");
     document.body.classList.add("fusion-menu-superior-ativo", "fusion-layout-fullwidth");
@@ -245,7 +411,6 @@
       <span>Todos os módulos</span>
       <span class="fusion-top-menu__caret" aria-hidden="true"></span>
     `;
-
     todos.appendChild(gatilhoTodos);
 
     const categorias = document.createElement("div");
@@ -279,7 +444,6 @@
     });
 
     const mega = criarMegaMenu(grupos);
-
     gatilhoTodos.addEventListener("click", evento => {
       evento.stopPropagation();
       const abrir = !mega.classList.contains("is-open");
@@ -291,23 +455,49 @@
     interno.append(todos, categorias, mega);
     nav.appendChild(interno);
     nav.addEventListener("click", evento => evento.stopPropagation());
+
+    const spacer = document.createElement("div");
+    spacer.id = "fusionTopMenuSpacer";
+    spacer.setAttribute("aria-hidden", "true");
+
+    document.body.prepend(spacer);
     document.body.prepend(nav);
+
+    encontrarRaiz();
+    garantirRetornoInstalacao();
+    sincronizarAlturaMenu();
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    agendarCorrecao();
+
+    menuObserver?.disconnect();
+    if (typeof ResizeObserver === "function") {
+      menuObserver = new ResizeObserver(() => {
+        sincronizarAlturaMenu();
+        agendarCorrecao();
+      });
+      menuObserver.observe(nav);
+    }
+
+    mutationObserver?.disconnect();
+    mutationObserver = new MutationObserver(() => agendarCorrecao());
+    const raiz = document.querySelector(".fusion-page-root-integral");
+    if (raiz) mutationObserver.observe(raiz, { childList: true, subtree: true });
 
     document.dispatchEvent(new CustomEvent("fusion:menu-superior-pronto"));
   }
 
-  let agendado = false;
+  let montagemAgendada = false;
   function agendarMenu() {
-    if (agendado) return;
-    agendado = true;
+    if (montagemAgendada) return;
+    montagemAgendada = true;
     queueMicrotask(() => {
-      agendado = false;
-      criarMenuSuperior();
+      montagemAgendada = false;
+      montarMenu();
     });
   }
 
   const carregarLayoutAnterior = window.carregarLayout;
-  window.carregarLayout = function carregarLayoutBeta5(...args) {
+  window.carregarLayout = function carregarLayoutIntegral(...args) {
     const resultado = typeof carregarLayoutAnterior === "function"
       ? carregarLayoutAnterior.apply(this, args)
       : undefined;
@@ -328,6 +518,20 @@
 
   window.addEventListener("load", () => {
     agendarMenu();
-    setTimeout(agendarMenu, 120);
+    setTimeout(() => {
+      sincronizarAlturaMenu();
+      garantirRetornoInstalacao();
+      encontrarRaiz();
+      agendarCorrecao();
+    }, 160);
+    setTimeout(agendarCorrecao, 900);
   }, { once: true });
+
+  window.addEventListener("pageshow", () => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    agendarCorrecao();
+  });
+
+  window.addEventListener("resize", agendarCorrecao);
+  window.addEventListener("orientationchange", () => setTimeout(agendarCorrecao, 80));
 })();
